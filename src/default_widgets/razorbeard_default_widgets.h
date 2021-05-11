@@ -1,5 +1,5 @@
-#ifndef H_RAZORBEARD_WIDGETS_DEFAULT
-#define H_RAZORBEARD_WIDGETS_DEFAULT
+#ifndef H_RAZORBEARD_DEFAULT_WIDGETS
+#define H_RAZORBEARD_DEFAULT_WIDGETS
 
 #include <stdint.h>
 #include <stdbool.h>
