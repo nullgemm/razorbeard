@@ -5,15 +5,71 @@
 #include <stdbool.h>
 #include "razorbeard.h"
 
+struct rzb_default_widgets_sizes
+{
+	// widget shadow thickness
+	uint32_t size_shadow;
+	// widget border thickness
+	uint32_t size_edge_border;
+	// selection border thickness
+	uint32_t size_selected_border;
+	// all text size
+	uint32_t size_font;
+
+	// thickness of the slider bars (with padding and edge border)
+	uint32_t size_slider;
+	// thickness of the handles and separators
+	uint32_t size_separator;
+	// size of the resizing corner of the text areas
+	uint32_t size_textarea_corner;
+	// default size of the tabs
+	uint32_t tab_default_width;
+	uint32_t tab_default_height;
+	// padding between the edge border and the content for some widgets
+	uint32_t padding_bar;
+	uint32_t padding_checkbox;
+	uint32_t padding_radiobutton;
+};
+
+struct rzb_default_widgets
+{
+	// sizes
+
+	// TODO
+	struct rzb_default_widgets_sizes sizes_dpi_XX1;
+	struct rzb_default_widgets_sizes sizes_dpi_XX2;
+	struct rzb_default_widgets_sizes sizes_dpi_XX3;
+
+	// colors
+
+	// widget shadow
+	uint32_t color_shadow;
+	// widget border
+	uint32_t color_edge;
+	// selection border
+	uint32_t color_selected;
+	// all text color
+	uint32_t color_text;
+
+	// regular window background
+	uint32_t color_background;
+	// button, drop-down menu, popup window
+	uint32_t color_foreground;
+	// text box and text area color
+	uint32_t color_background_box;
+	// button light reflection
+	uint32_t color_foreground_shine;
+};
+
 // handles
 
 struct rzb_widget_handles*
 	rzb_alloc_widget_handles(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_handles* widget,
 		bool horizontal,
-		uint32_t sections_count,
-		struct rzb_widget_handles_style* style);
+		uint32_t sections_count);
 
 struct rzb_widget_handles
 {
@@ -23,22 +79,14 @@ struct rzb_widget_handles
 	uint32_t* section_dragging;
 };
 
-struct rzb_widget_handles_style
-{
-	uint32_t padding_handle;
-	uint32_t size_handle;
-	uint32_t color_foreground;
-	uint32_t color_selected;
-};
-
 // pager
 
 struct rzb_widget_pager*
 	rzb_alloc_widget_pager(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_pager* widget,
-		bool horizontal,
-		struct rzb_widget_pager_style* style);
+		bool horizontal);
 
 struct rzb_widget_pager
 {
@@ -47,36 +95,21 @@ struct rzb_widget_pager
 	uint32_t position_page;
 };
 
-struct rzb_widget_pager_style
-{
-	uint32_t color_background;
-};
-
 // tabs
 
 struct rzb_widget_tabs*
 	rzb_alloc_widget_tabs(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_tabs* widget,
+		struct rzb_widget_tabs_events* events_callbacks,
 		char** tabs_names,
-		uint32_t tab_active;
-		struct rzb_widget_tabs_style* style);
+		uint32_t tab_active);
 
 struct rzb_widget_tabs
 {
 	char** tabs_names;
 	uint32_t tab_active;
-};
-
-struct rzb_widget_tabs_style
-{
-	uint32_t tab_width;
-	uint32_t tab_height;
-	uint32_t size_font;
-	uint32_t size_selected;
-	uint32_t color_background;
-	uint32_t color_foreground;
-	uint32_t color_selected;
 };
 
 struct rzb_widget_tabs_events
@@ -89,66 +122,37 @@ struct rzb_widget_tabs_events
 struct rzb_widget_popup*
 	rzb_alloc_widget_popup(
 		struct rzb* rzb,
-		struct rzb_widget_popup* widget,
-		struct rzb_widget_popup_style* style);
-
-struct rzb_widget_popup_style
-{
-	uint32_t size_border;
-	uint32_t size_shadow;
-	uint32_t color_border;
-	uint32_t color_background;
-};
+		struct rzb_default_widgets* default_widgets,
+		struct rzb_widget_popup* widget);
 
 // dropmenu
 
 struct rzb_widget_dropmenu*
 	rzb_alloc_widget_dropmenu(
 		struct rzb* rzb,
-		struct rzb_widget_dropmenu* widget,
-		struct rzb_widget_dropmenu_style* style);
-
-struct rzb_widget_dropmenu_style
-{
-	uint32_t size_border;
-	uint32_t size_shadow;
-	uint32_t color_border;
-	uint32_t color_background;
-};
+		struct rzb_default_widgets* default_widgets,
+		struct rzb_widget_dropmenu* widget);
 
 // separator
 
 struct rzb_widget_separator*
 	rzb_alloc_widget_separator(
 		struct rzb* rzb,
-		struct rzb_widget_separator* widget,
-		struct rzb_widget_separator_style* style);
-
-struct rzb_widget_separator_style
-{
-	uint32_t padding_separator;
-	uint32_t size_separator;
-	uint32_t color_foreground;
-};
+		struct rzb_default_widgets* default_widgets,
+		struct rzb_widget_separator* widget);
 
 // text
 
 struct rzb_widget_text*
 	rzb_alloc_widget_text(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_text* widget,
-		char* text;
-		struct rzb_widget_text_style* style);
+		char* text);
 
 struct rzb_widget_text
 {
 	char* text;
-};
-
-struct rzb_widget_text_style
-{
-	uint32_t size_font;
-	uint32_t color_foreground;
 };
 
 // image
@@ -156,11 +160,11 @@ struct rzb_widget_text_style
 struct rzb_widget_image*
 	rzb_alloc_widget_image(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_image* widget,
 		bool alpha_premult,
 		uint32_t gamma,
-		uint32_t rgba,
-		struct rzb_widget_image_style* style);
+		uint32_t rgba);
 
 struct rzb_widget_image
 {
@@ -169,20 +173,16 @@ struct rzb_widget_image
 	uint32_t* rgba;
 };
 
-struct rzb_widget_image_style
-{
-	uint32_t color_background;
-};
-
 // button
 
 struct rzb_widget_button*
 	rzb_alloc_widget_button(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_button* widget,
+		struct rzb_widget_button_events* events_callbacks,
 		bool toggle,
-		char* text,
-		struct rzb_widget_button_style* style);
+		char* text);
 
 struct rzb_widget_button
 {
@@ -190,19 +190,6 @@ struct rzb_widget_button
 	bool toggle; // wether the button is a switch
 	bool active; // wether the switch is active
 	char* text;
-};
-
-struct rzb_widget_button_style
-{
-	uint32_t size_font;
-	uint32_t size_edge;
-	uint32_t size_border;
-	uint32_t color_foreground;
-	uint32_t color_background;
-	uint32_t color_selected;
-	uint32_t color_active;
-	uint32_t color_shade;
-	uint32_t color_edge;
 };
 
 struct rzb_widget_button_events
@@ -217,28 +204,16 @@ struct rzb_widget_button_events
 struct rzb_widget_numberbox*
 	rzb_alloc_widget_numberbox(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_numberbox* widget,
-		char* value,
-		struct rzb_widget_numberbox_style* style);
+		struct rzb_widget_numberbox_events* events_callbacks,
+		char* value);
 
 struct rzb_widget_numberbox
 {
 	bool pushed_up;
 	bool pushed_down;
 	char* value;
-};
-
-struct rzb_widget_numberbox_style
-{
-	uint32_t size_font;
-	uint32_t size_edge;
-	uint32_t size_border;
-	uint32_t color_textbox;
-	uint32_t color_foreground;
-	uint32_t color_background;
-	uint32_t color_selected;
-	uint32_t color_shade;
-	uint32_t color_edge;
 };
 
 struct rzb_widget_numberbox_events
@@ -251,26 +226,16 @@ struct rzb_widget_numberbox_events
 struct rzb_widget_textbox*
 	rzb_alloc_widget_textbox(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_textbox* widget,
-		char* text,
-		struct rzb_widget_textbox_style* style);
+		struct rzb_widget_textbox_events* events_callbacks,
+		char* text);
 
 struct rzb_widget_textbox
 {
 	char* cursor_beg;
 	char* cursor_end;
 	char* text;
-};
-
-struct rzb_widget_textbox_style
-{
-	uint32_t size_font;
-	uint32_t size_edge;
-	uint32_t size_border;
-	uint32_t color_foreground;
-	uint32_t color_background;
-	uint32_t color_selected;
-	uint32_t color_edge;
 };
 
 struct rzb_widget_textbox_events
@@ -283,10 +248,11 @@ struct rzb_widget_textbox_events
 struct rzb_widget_textarea*
 	rzb_alloc_widget_textarea(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_textarea* widget,
+		struct rzb_widget_textarea_events* events_callbacks,
 		bool resizable,
-		char* text,
-		struct rzb_widget_textarea_style* style);
+		char* text);
 
 struct rzb_widget_textarea
 {
@@ -295,18 +261,6 @@ struct rzb_widget_textarea
 	char* cursor_beg;
 	char* cursor_end;
 	char* text;
-};
-
-struct rzb_widget_textarea_style
-{
-	uint32_t size_font;
-	uint32_t size_edge;
-	uint32_t size_border;
-	uint32_t size_corner;
-	uint32_t color_foreground;
-	uint32_t color_background;
-	uint32_t color_selected;
-	uint32_t color_edge;
 };
 
 struct rzb_widget_textarea_events
@@ -319,22 +273,14 @@ struct rzb_widget_textarea_events
 struct rzb_widget_radiobutton*
 	rzb_alloc_widget_radiobutton(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_radiobutton* widget,
-		bool checked,
-		struct rzb_widget_radiobutton_style* style);
+		struct rzb_widget_radiobutton_events* events_callbacks,
+		bool checked);
 
 struct rzb_widget_radiobutton
 {
 	bool checked;
-};
-
-struct rzb_widget_radiobutton_style
-{
-	uint32_t size_border;
-	uint32_t padding_check;
-	uint32_t color_foreground;
-	uint32_t color_background;
-	uint32_t color_selected;
 };
 
 struct rzb_widget_radiobutton_events
@@ -347,22 +293,14 @@ struct rzb_widget_radiobutton_events
 struct rzb_widget_checkbox*
 	rzb_alloc_widget_checkbox(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_checkbox* widget,
-		bool checked,
-		struct rzb_widget_checkbox_style* style);
+		struct rzb_widget_checkbox_events* events_callbacks,
+		bool checked);
 
 struct rzb_widget_checkbox
 {
 	bool checked;
-};
-
-struct rzb_widget_checkbox_style
-{
-	uint32_t size_border;
-	uint32_t padding_check;
-	uint32_t color_foreground;
-	uint32_t color_background;
-	uint32_t color_selected;
 };
 
 struct rzb_widget_checkbox_events
@@ -375,21 +313,15 @@ struct rzb_widget_checkbox_events
 struct rzb_widget_scrollbar*
 	rzb_alloc_widget_scrollbar(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_scrollbar* widget,
-		struct rzb_widget_scrollbar_style* style);
+		struct rzb_widget_scrollbar_events* events_callbacks);
 
 struct rzb_widget_scrollbar
 {
 	bool pushed;
 	uint32_t size_scrollbar;
 	uint32_t position_scrollbar;
-};
-
-struct rzb_widget_scrollbar_style
-{
-	uint32_t color_foreground;
-	uint32_t color_background;
-	uint32_t color_selected;
 };
 
 struct rzb_widget_scrollbar_events
@@ -402,29 +334,17 @@ struct rzb_widget_scrollbar_events
 struct rzb_widget_slider*
 	rzb_alloc_widget_slider(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_slider* widget,
+		struct rzb_widget_slider_events* events_callbacks,
 		bool vertical,
-		uint32_t progress,
-		struct rzb_widget_slider_style* style);
+		uint32_t progress);
 
 struct rzb_widget_slider
 {
 	bool pushed;
 	bool vertical;
 	uint32_t progress; // 16.16 fixed-point
-};
-
-struct rzb_widget_slider_style
-{
-	uint32_t padding_edge;
-	uint32_t size_slider;
-	uint32_t size_border;
-	uint32_t size_edge;
-	uint32_t color_foreground;
-	uint32_t color_background;
-	uint32_t color_selected;
-	uint32_t color_shade;
-	uint32_t color_edge;
 };
 
 struct rzb_widget_slider_events
@@ -437,24 +357,15 @@ struct rzb_widget_slider_events
 struct rzb_widget_progressbar*
 	rzb_alloc_widget_progressbar(
 		struct rzb* rzb,
+		struct rzb_default_widgets* default_widgets,
 		struct rzb_widget_progressbar* widget,
 		bool vertical,
-		uint32_t progress,
-		struct rzb_widget_progressbar_style* style);
+		uint32_t progress);
 
 struct rzb_widget_progressbar
 {
 	bool vertical;
 	uint32_t progress; // 16.16 fixed-point
-};
-
-struct rzb_widget_progressbar_style
-{
-	uint32_t padding_edge;
-	uint32_t size_edge;
-	uint32_t color_foreground;
-	uint32_t color_background;
-	uint32_t color_edge;
 };
 
 #endif

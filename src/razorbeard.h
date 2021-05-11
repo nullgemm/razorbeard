@@ -21,9 +21,9 @@ struct rzb
 	struct rzb_widget** render_list;
 	uint32_t render_list_size;
 
-	struct rzb_widget*** visual_hashmap;
-	uint32_t visual_hashmap_width;
-	uint32_t visual_hashmap_height;
+	struct rzb_widget*** window_partition;
+	uint32_t window_partition_width;
+	uint32_t window_partition_height;
 };
 
 // razorbeard widget
