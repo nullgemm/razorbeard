@@ -1,7 +1,19 @@
 #ifndef H_RAZORBEARD
 #define H_RAZORBEARD
 
-// TODO widgets data getters and setters
+// TODO widget standard fields getters and setters (final)
+// TODO widget init and free functions (final)
+// TODO widget sample layout functions (absolute pos. simple init)
+// TODO widget sample render functions (final)
+// TODO widget stand-alone example render with globox (only for initial tests)
+//
+// TODO razorbeard init/free
+// TODO razorbeard rendering
+// TODO razorbeard event handling
+// TODO widget event handling
+// TODO razorbeard complete example with globox + willis + dpishit + cursoryx
+//
+// TODO widget data getters and setters
 // TODO widget context getters and setters
 
 // pre-declaration
@@ -31,6 +43,7 @@ struct rzb
 	uint32_t window_partition_width;
 	uint32_t window_partition_height;
 
+	uint32_t* rzb_argb;
 	struct rzb_display_info* display_info;
 };
 
