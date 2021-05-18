@@ -1,7 +1,6 @@
 #ifndef H_RAZORBEARD
 #define H_RAZORBEARD
 
-// TODO widget standard fields getters and setters (final)
 // TODO widget init and free functions (final)
 // TODO widget sample layout functions (absolute pos. simple init)
 // TODO widget sample render functions (final)
@@ -14,7 +13,6 @@
 // TODO razorbeard complete example with globox + willis + dpishit + cursoryx
 //
 // TODO widget data getters and setters
-// TODO widget context getters and setters
 
 // pre-declaration
 struct rzb_widget;
