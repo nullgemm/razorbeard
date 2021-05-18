@@ -99,11 +99,11 @@ void rzb_event_widget_handles(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_handles_click(
+void rzb_event_widget_handles_move_start(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_handles_release(
+void rzb_event_widget_handles_move_end(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
@@ -374,11 +374,19 @@ void rzb_event_widget_numberbox(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_numberbox_click(
+void rzb_event_widget_numberbox_select_start(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_numberbox_release(
+void rzb_event_widget_numberbox_select_end(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
+
+void rzb_event_widget_numberbox_increase(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
+
+void rzb_event_widget_numberbox_decrease(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
@@ -420,11 +428,11 @@ void rzb_event_widget_textbox(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_textbox_click(
+void rzb_event_widget_textbox_select_start(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_textbox_release(
+void rzb_event_widget_textbox_select_end(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
@@ -467,11 +475,19 @@ void rzb_event_widget_textarea(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_textarea_click(
+void rzb_event_widget_textarea_select_start(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_textarea_release(
+void rzb_event_widget_textarea_select_end(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
+
+void rzb_event_widget_textarea_resize_start(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
+
+void rzb_event_widget_textarea_resize_end(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
@@ -594,11 +610,11 @@ void rzb_event_widget_scrollbar(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_scrollbar_click(
+void rzb_event_widget_scrollbar_move_start(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_scrollbar_release(
+void rzb_event_widget_scrollbar_move_end(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
@@ -637,11 +653,11 @@ void rzb_event_widget_slider(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_slider_click(
+void rzb_event_widget_slider_move_start(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_event_widget_slider_release(
+void rzb_event_widget_slider_move_end(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 

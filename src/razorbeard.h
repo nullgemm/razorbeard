@@ -1,21 +1,8 @@
 #ifndef H_RAZORBEARD
 #define H_RAZORBEARD
 
-// TODO rzb alloc+free (root widget = handles with 1 section)
-// TODO events callbacks (main handle callers)
-//      (events are sent to razorbeard by the user, getting them in the first place is not our problem)
-//      (the user will use a lut to translate willis events to razorbeard events)
-//      (advanced input methods should not be taken into account quite yet
-//       ibus does not support the wayland protocol
-//       fcitx supports everything)
-//      (when it is time remember XIM is THE method everyone uses under X11,
-//       and the text_input_method protocol should be used for wayland,
-//       clients are NOT supposed to use dbus directly)
-// TODO widget alloc+free (individual widgets)
-//
-// TODO layout executor (the layout functions are part of the example unless forced)
-// TODO render executor (the rendering functions are part of the hard-coded defaults)
-// TODO events executor (the event functions are not customizable and set at init)
+// TODO widgets data getters and setters
+// TODO widget context getters and setters
 
 // pre-declaration
 struct rzb_widget;
@@ -35,6 +22,7 @@ struct rzb_display_info
 struct rzb
 {
 	struct rzb_widget* root_widget;
+	struct rzb_widget* events_grabber;
 
 	struct rzb_widget** render_list;
 	uint32_t render_list_size;
@@ -123,6 +111,10 @@ bool rzb_free(
 void rzb_send_event(
 	struct rzb* rzb,
 	int event_id);
+
+void rzb_grab_events(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
 
 void rzb_render(
 	struct rzb* rzb);
