@@ -16,15 +16,24 @@ struct rzb_default_widgets_sizes
 	// all text size
 	uint32_t size_font;
 
+	// fine top shine border thickness
+	uint32_t size_shine_edge;
+	// botton shine gradient size
+	uint32_t size_shine_gradient;
+	// corner radius
+	uint32_t radius_edge_border;
+
 	// thickness of the slider bars (with padding and edge border)
 	uint32_t size_slider;
 	// thickness of the handles and separators
 	uint32_t size_separator;
 	// size of the resizing corner of the text areas
 	uint32_t size_textarea_corner;
+
 	// default size of the tabs
 	uint32_t tab_default_width;
 	uint32_t tab_default_height;
+
 	// padding between the edge border and the content for some widgets
 	uint32_t padding_bar;
 	uint32_t padding_checkbox;
@@ -283,7 +292,7 @@ struct rzb_widget*
 		struct rzb_default_widgets_context* context,
 		bool alpha_premult,
 		uint32_t gamma,
-		uint32_t rgba);
+		uint32_t* rgba);
 
 void rzb_free_widget_image(
 	struct rzb* rzb,
