@@ -1,9 +1,22 @@
 #ifndef H_RAZORBEARD
 #define H_RAZORBEARD
 
-// TODO widget init and free functions (final)
-// TODO widget sample layout functions (absolute pos. simple init)
+// DONE forget about this corner saving idea, for both software and gpu backends...
+// TODO ultra-specialize the opengl backends
+//      we can't generalize GPU-based UI rendering, so just like the software backend,
+//      this one will also be targetting exclusively classic desktop applications:
+//      its only goal will be to provide an alternative backend for classic apps.
+//      for games and other uses of the GPU-based UI rendering,
+//      the developer is supposed to come up with custom rendering.
+// TODO bundle Noto inside the default widgets library
+//
+// DONE widget init and free functions (final)
 // TODO widget sample render functions (final)
+//      make it compile in a globox example
+//      write a widget's render function, test in globox, iterate until finished
+//      	(cropping must be supported and all cases test-rendered)
+//      same for the next widget
+//      etc.
 // TODO widget stand-alone example render with globox (only for initial tests)
 //
 // TODO razorbeard init/free

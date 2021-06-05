@@ -25,10 +25,27 @@ struct rzb_default_widgets_sizes
 
 	// thickness of the slider bars (with padding and edge border)
 	uint32_t size_slider;
-	// thickness of the handles and separators
+	// thickness of the separators
 	uint32_t size_separator;
 	// size of the resizing corner of the text areas
 	uint32_t size_textarea_corner;
+
+	// thickness of the textbox scrollbar
+	uint32_t size_textbox_scrollbar;
+	// padding around the textbox scrollbar
+	uint32_t padding_textbox_scrollbar;
+
+	// thickness of the tab separator
+	uint32_t size_tab_separator;
+	// space between the tips of the separator and the limits of the tab area
+	uint32_t padding_tab_separator;
+
+	// thickness of the handles
+	uint32_t size_handle;
+	// radius of the handle circles
+	uint32_t radius_handle;
+	// padding between the handle circles
+	uint32_t padding_handle;
 
 	// default size of the tabs
 	uint32_t tab_default_width;
@@ -36,6 +53,7 @@ struct rzb_default_widgets_sizes
 
 	// padding between the edge border and the content for some widgets
 	uint32_t padding_bar;
+	uint32_t padding_textbox;
 	uint32_t padding_checkbox;
 	uint32_t padding_radiobutton;
 };

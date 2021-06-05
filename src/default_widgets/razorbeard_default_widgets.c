@@ -28,10 +28,21 @@ bool rzb_default_widgets_init(
 		.size_separator = 1;
 		.size_textarea_corner = 6;
 
+		.size_textbox_scrollbar = 6;
+		.padding_textbox_scrollbar = 1;
+
+		.size_tab_separator = 1;
+		.padding_tab_separator = 4;
+
+		.size_handle = 1;
+		.radius_handle = 2;
+		.padding_handle = 2;
+
 		.tab_default_width = 44;
 		.tab_default_height = 16;
 
 		.padding_bar = 1;
+		.padding_textbox = 3;
 		.padding_checkbox = 1;
 		.padding_radiobutton = 2;
 	};
@@ -48,13 +59,24 @@ bool rzb_default_widgets_init(
 		.radius_edge_border = 4;
 
 		.size_slider = 8;
-		.size_separator = 2;
+		.size_separator = 1;
 		.size_textarea_corner = 12;
+
+		.size_textbox_scrollbar = 8;
+		.padding_textbox_scrollbar = 2;
+
+		.size_tab_separator = 2;
+		.padding_tab_separator = 7;
+
+		.size_handle = 2;
+		.radius_handle = 2;
+		.padding_handle = 3;
 
 		.tab_default_width = 106;
 		.tab_default_height = 33;
 
 		.padding_bar = 1;
+		.padding_textbox = 6;
 		.padding_checkbox = 3;
 		.padding_radiobutton = 5;
 	};
@@ -71,13 +93,24 @@ bool rzb_default_widgets_init(
 		.radius_edge_border = 7;
 
 		.size_slider = 12;
-		.size_separator = 3;
+		.size_separator = 2;
 		.size_textarea_corner = 18;
+
+		.size_textbox_scrollbar = 12;
+		.padding_textbox_scrollbar = 3;
+
+		.size_tab_separator = 3
+		.padding_tab_separator = 11;
+
+		.size_handle = 3;
+		.radius_handle = 3;
+		.padding_handle = 5;
 
 		.tab_default_width = 159;
 		.tab_default_height = 49;
 
 		.padding_bar = 2;
+		.padding_textbox = 9;
 		.padding_checkbox = 5;
 		.padding_radiobutton = 7;
 	};
