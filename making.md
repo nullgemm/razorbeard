@@ -7,29 +7,29 @@ in my humble opinion, the latter is broader in scope and does not qualify
 as we will concentrate on desktop widgets exclusively.
 
 ## Elementary widgets
-Grid `Handle`
-Pager
-Tabs
-Popup
-Drop Menu
+ - Grid `Handle`
+ - Pager
+ - Tabs
+ - Popup
+ - Drop Menu
 
-Separator
-Text+Link
-Buffer
+ - Separator
+ - Text+Link
+ - Buffer
 
-Button `Symbol` `Toggle`
-Number Box
-Text Box `Symbol`
-Text Area
-Radio Button
-Checkbox
-Scroll Bar
-Slider
-Progress Bar
+ - Button `Symbol` `Toggle`
+ - Number Box
+ - Text Box `Symbol`
+ - Text Area
+ - Radio Button
+ - Checkbox
+ - Scroll Bar
+ - Slider
+ - Progress Bar
 
 ## Extra widgets
-Progress Ring
-Color picker
+ - Progress Ring
+ - Color picker
 
 ## Native controls decomposition examples
 Because Razorbeard implements an elementary set of widgets, some of the advanced
