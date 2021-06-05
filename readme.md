@@ -49,6 +49,3 @@ You might be interested in my other similarly-minded projects:
  - [Willis](https://github.com/nullgemm/willis) (input handling)
  - [DPIshit](https://github.com/nullgemm/dpishit) (density detection)
  - [Cursoryx](https://github.com/nullgemm/cursoryx) (mouse cursor management)
-
-## Greetings
-Qt and GTK by being so fucking complicated.
