@@ -1,6 +1,10 @@
 #ifndef H_RAZORBEARD
 #define H_RAZORBEARD
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 // DONE forget about this corner saving idea, for both software and gpu backends...
 // TODO ultra-specialize the opengl backends
 //      we can't generalize GPU-based UI rendering, so just like the software backend,
@@ -33,10 +37,10 @@ struct rzb_widget;
 // dpi info
 struct rzb_display_info
 {
-	uint16_t px_width;
-	uint16_t px_height;
-	uint16_t mm_width;
-	uint16_t mm_height;
+	int px_width;
+	int px_height;
+	int mm_width;
+	int mm_height;
 	double dpi_logic;
 	double scale;
 };
@@ -48,23 +52,26 @@ struct rzb
 	struct rzb_widget* events_grabber;
 
 	struct rzb_widget** render_list;
-	uint32_t render_list_size;
+	size_t render_list_size;
 
 	struct rzb_widget*** window_partition;
-	uint32_t window_partition_width;
-	uint32_t window_partition_height;
+	size_t window_partition_width;
+	size_t window_partition_height;
 
-	uint32_t* rzb_argb;
+	uint32_t* argb;
+	int argb_width;
+	int argb_height;
+
 	struct rzb_display_info* display_info;
 };
 
 // razorbeard cropping info
 struct rzb_cropping
 {
-	uint64_t x;
-	uint64_t y;
-	uint64_t width;
-	uint64_t height;
+	int x;
+	int y;
+	int width;
+	int height;
 };
 
 // razorbeard widget
@@ -86,10 +93,10 @@ struct rzb_widget
 	//   must be written by the user to offset the positions
 	//   using the scroll value stored in the parent's widget data
 	// - after re-rendering, the pager height and scroll value is updated
-	uint64_t x;
-	uint64_t y;
-	uint64_t width;
-	uint64_t height;
+	int x;
+	int y;
+	int width;
+	int height;
 
 	// callbacks
 
@@ -126,7 +133,6 @@ struct rzb_widget
 
 bool rzb_init(
 	struct rzb* rzb,
-	struct rzb_widget* widget,
 	struct rzb_display_info* display_info);
 
 bool rzb_free(

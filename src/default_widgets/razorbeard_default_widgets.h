@@ -8,54 +8,54 @@
 struct rzb_default_widgets_sizes
 {
 	// widget shadow thickness
-	uint32_t size_shadow;
+	int size_shadow;
 	// widget border thickness
-	uint32_t size_edge_border;
+	int size_edge_border;
 	// selection border thickness
-	uint32_t size_selected_border;
+	int size_selected_border;
 	// all text size
-	uint32_t size_font;
+	int size_font;
 
 	// fine top shine border thickness
-	uint32_t size_shine_edge;
+	int size_shine_edge;
 	// botton shine gradient size
-	uint32_t size_shine_gradient;
+	int size_shine_gradient;
 	// corner radius
-	uint32_t radius_edge_border;
+	int radius_edge_border;
 
 	// thickness of the slider bars (with padding and edge border)
-	uint32_t size_slider;
+	int size_slider;
 	// thickness of the separators
-	uint32_t size_separator;
+	int size_separator;
 	// size of the resizing corner of the text areas
-	uint32_t size_textarea_corner;
+	int size_textarea_corner;
 
 	// thickness of the textbox scrollbar
-	uint32_t size_textbox_scrollbar;
+	int size_textbox_scrollbar;
 	// padding around the textbox scrollbar
-	uint32_t padding_textbox_scrollbar;
+	int padding_textbox_scrollbar;
 
 	// thickness of the tab separator
-	uint32_t size_tab_separator;
+	int size_tab_separator;
 	// space between the tips of the separator and the limits of the tab area
-	uint32_t padding_tab_separator;
+	int padding_tab_separator;
 
 	// thickness of the handles
-	uint32_t size_handle;
+	int size_handle;
 	// radius of the handle circles
-	uint32_t radius_handle;
+	int radius_handle;
 	// padding between the handle circles
-	uint32_t padding_handle;
+	int padding_handle;
 
 	// default size of the tabs
-	uint32_t tab_default_width;
-	uint32_t tab_default_height;
+	int tab_default_width;
+	int tab_default_height;
 
 	// padding between the edge border and the content for some widgets
-	uint32_t padding_bar;
-	uint32_t padding_textbox;
-	uint32_t padding_checkbox;
-	uint32_t padding_radiobutton;
+	int padding_bar;
+	int padding_textbox;
+	int padding_checkbox;
+	int padding_radiobutton;
 };
 
 struct rzb_default_widgets_context
@@ -64,15 +64,15 @@ struct rzb_default_widgets_context
 
 	int* events_table;
 	char** events_data_typed_string;
-	uint16_t events_data_mouse_pos_x;
-	uint16_t events_data_mouse_pos_y;
+	int events_data_mouse_pos_x;
+	int events_data_mouse_pos_y;
 
 	// sizes
 
-	struct rzb_widgets_sizes* sizes_current;
-	struct rzb_widgets_sizes sizes_density_low;
-	struct rzb_widgets_sizes sizes_density_medium;
-	struct rzb_widgets_sizes sizes_density_high;
+	struct rzb_default_widgets_sizes* sizes_current;
+	struct rzb_default_widgets_sizes sizes_density_low;
+	struct rzb_default_widgets_sizes sizes_density_medium;
+	struct rzb_default_widgets_sizes sizes_density_high;
 
 	// colors
 
@@ -111,7 +111,7 @@ struct rzb_widget*
 		void (*callback_layout)(struct rzb*, struct rzb_widget*),
 		struct rzb_default_widgets_context* context,
 		bool horizontal,
-		uint32_t sections_count);
+		int sections_count);
 
 void rzb_free_widget_handles(
 	struct rzb* rzb,
@@ -139,9 +139,9 @@ struct rzb_widget_handles
 	struct rzb_default_widgets_context* context;
 
 	bool horizontal;
-	uint32_t sections_count;
-	uint32_t* section_lengths;
-	uint32_t* section_dragging;
+	int sections_count;
+	int* section_lengths;
+	int* section_dragging;
 };
 
 // pager
@@ -179,8 +179,8 @@ struct rzb_widget_pager
 	struct rzb_default_widgets_context* context;
 
 	bool horizontal;
-	uint32_t size_page;
-	uint32_t position_page;
+	int size_page;
+	int position_page;
 };
 
 // tabs
@@ -192,7 +192,7 @@ struct rzb_widget*
 		struct rzb_default_widgets_context* context,
 		void (*tab_switched)(struct rzb*, struct rzb_widget*),
 		char** tabs_names,
-		uint32_t tab_active);
+		int tab_active);
 
 void rzb_free_widget_tabs(
 	struct rzb* rzb,
@@ -222,7 +222,7 @@ struct rzb_widget_tabs
 	void (*tab_switched)(struct rzb*, struct rzb_widget*);
 
 	char** tabs_names;
-	uint32_t tab_active;
+	int tab_active;
 };
 
 // popup
@@ -652,8 +652,8 @@ struct rzb_widget_scrollbar
 	void (*scrollbar_moved)(struct rzb*, struct rzb_widget*);
 
 	bool pushed;
-	uint32_t size_scrollbar;
-	uint32_t position_scrollbar;
+	int size_scrollbar;
+	int position_scrollbar;
 };
 
 // slider
