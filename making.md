@@ -1,6 +1,8 @@
 # Razorbeard Widgets
 This file serves as a simple report of the latest developments in the native
 widget toolkits of macOS, Windows and Linux, namely WinUI, Cocoa, and GTK+.
+All these native controls are expressed here in terms of elementary components:
+this helped indentifying what widgets to provide in Razorbeard.
 
 GTK+ was chosen over Qt as the unix-world sample in this document because,
 in my humble opinion, the latter is broader in scope and does not qualify
