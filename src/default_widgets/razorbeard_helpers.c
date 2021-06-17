@@ -1388,65 +1388,29 @@ void rzb_helper_render_arrow_horizontal(
 	int crop_x2 = half_size + odd;
 	int crop_width2 = half_size + (1 + odd);
 
-	// cropping the first arrow horizontally
-	if (cropping->x > (x1 - center + half_size + 1))
-	{
-		crop_width1 = 0;
-	}
-	else if (cropping->x > (x1 - center))
-	{
-		crop_x1 = cropping->x - x1 + center;
-		crop_width1 = half_size + (1 + odd) - crop_x1;
-	}
+	rzb_helper_crop_rectangle(
+		crop_x1,
+		crop_width1,
+		cropping->x - x1 + center,
+		cropping->width,
+		&crop_x1,
+		&crop_width1);
 
-	if ((cropping->x + cropping->width) < (x1 - center))
-	{
-		crop_width1 = 0;
-	}
-	else if ((cropping->x + cropping->width) < (x1 - center + half_size + 1 + odd))
-	{
-		crop_width1 = cropping->x + cropping->width - (x1 + crop_x1 - center);
-	}
+	rzb_helper_crop_rectangle(
+		crop_x2,
+		crop_width2,
+		cropping->x - (x2 + center - 2 * (half_size + odd) - 1),
+		cropping->width,
+		&crop_x2,
+		&crop_width2);
 
-	// cropping the second arrow horizontally
-	if (cropping->x > (x2 + center + odd - 1))
-	{
-		crop_width2 = 0;
-	}
-	else if (cropping->x > (x2 + center - odd - 1 - half_size))
-	{
-		crop_x2 = cropping->x - x2 - center + 2 * (half_size + odd) + 1;
-		crop_width2 = 2 * (half_size + odd) + 1 - crop_x2;
-	}
-
-	if ((cropping->x + cropping->width) < (x2 + center - half_size - odd - 1))
-	{
-		crop_width2 = 0;
-	}
-	else if ((cropping->x + cropping->width) < (x2 + center))
-	{
-		crop_width2 = cropping->x + cropping->width - (crop_x2 + x2 + center - 2 * (half_size + odd) - 1);
-	}
-
-	// cropping vertically
-	if (cropping->y > (y + half_size + odd))
-	{
-		crop_height = 0;
-	}
-	else if (cropping->y > (y - half_size - odd))
-	{
-		crop_y = cropping->y - (y - half_size - odd);
-		crop_height = size - crop_y + 1;
-	}
-
-	if ((cropping->y + cropping->height) < (y - half_size - odd))
-	{
-		crop_height = 0;
-	}
-	else if ((cropping->y + cropping->height) < (y + half_size + 1))
-	{
-		crop_height = cropping->y + cropping->height - (crop_y + y - half_size - odd);
-	}
+	rzb_helper_crop_rectangle(
+		crop_y,
+		crop_height,
+		cropping->y - (y - half_size - odd),
+		cropping->height,
+		&crop_y,
+		&crop_height);
 
 	// copy relevant background sections in temporary buffer
 	for (int pos_y = crop_y; pos_y < (crop_y + crop_height); ++pos_y)
