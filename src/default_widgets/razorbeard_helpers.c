@@ -1,75 +1,16 @@
-#include "razorbeard_helpers.h"
+// TODO only implement rings without inner anti-aliasing
+// TODO always render everything from back to front
+// TODO render the buttons by first rendering an opaque rectangular gradient
+// TODO render the circularly cropped gradients as a post-process step
+//      using a dedicated function that provides its own tmp buffer
 
+#include "razorbeard_helpers.h"
+#include "razorbeard_math.h"
+
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-static uint32_t isqrt(uint32_t x)
-{
-	uint32_t x1;
-	int32_t s;
-	int32_t g0;
-	int32_t g1;
-
-	if (x <= 1)
-	{
-		return x;
-	}
-
-	s = 1;
-	x1 = x - 1;
-
-	if (x1 > 65535)
-	{
-		s = s + 8;
-		x1 = x1 >> 16;
-	}
-
-	if (x1 > 255)
-	{
-		s = s + 4;
-		x1 = x1 >> 8;
-	}
-
-	if (x1 > 15)
-	{
-		s = s + 2;
-		x1 = x1 >> 4;
-	}
-
-	if (x1 > 3)
-	{
-		s = s + 1;
-	}
-
-	g0 = 1 << s;
-	g1 = (g0 + (x >> s)) >> 1;
-
-	while (g1 < g0)
-	{
-		g0 = g1;
-		g1 = (g0 + (x / g0)) >> 1;
-	}
-
-	return g0;
-}
-
-// gamma = 2.2 approximate transformations
-// i.e. not exactly sRGB compliant (but close)
-static inline uint32_t gamma_22(uint32_t x)
-{
-	uint32_t t = (x << 16) / 0x101;
-	uint32_t t3 = (((t * t) >> 16) * t) << 0; // compensate left-shifting of division
-
-	return t3 / ((0x2300 + ((0xDC * t) >> 8)) >> 8);
-}
-
-static inline uint32_t r_gamma_22(uint32_t x)
-{
-	uint32_t t = (x << 0) / 0x102; // compensate right-shifting of isqrt
-
-	return (isqrt(t << 14) << 9) / (0xEB00 + ((0x14*t) >> 8));
-}
 
 // gamma-aware color blending with the existing pixel values
 void pixel_set(
@@ -89,177 +30,165 @@ void pixel_set(
 	if (a_out > 0)
 	{
 		p[0] = r_gamma_22(
-			(((uint64_t) gamma_22(r) * a)
-			+ (((uint64_t) gamma_22(p[0]) * a_dst * (0xFF - a)) / 0xFF))
+			(((int) gamma_22(b) * a)
+			+ (((int) gamma_22(p[0]) * a_dst * (0xFF - a)) / 0xFF))
 			/ a_out);
+
 		p[1] = r_gamma_22(
-			(((uint64_t) gamma_22(g) * a)
-			+ (((uint64_t) gamma_22(p[1]) * a_dst * (0xFF - a)) / 0xFF))
+			(((int) gamma_22(g) * a)
+			+ (((int) gamma_22(p[1]) * a_dst * (0xFF - a)) / 0xFF))
 			/ a_out);
+
 		p[2] = r_gamma_22(
-			(((uint64_t) gamma_22(b) * a)
-			+ (((uint64_t) gamma_22(p[2]) * a_dst * (0xFF - a)) / 0xFF))
+			(((int) gamma_22(r) * a)
+			+ (((int) gamma_22(p[2]) * a_dst * (0xFF - a)) / 0xFF))
 			/ a_out);
 	}
 
 	p[3] = a_out;
 }
 
-int rzb_helper_crop_circle(
+int rzb_helper_crop_rounded_rectangle(
+	int x,
+	int y,
+	int width,
+	int height,
 	int radius,
-	int circle_x,
-	int circle_y,
 	struct rzb_cropping* cropping,
 	int* intersections)
 {
 	int intersections_count = 0;
-	int cropping_circle_y1 = cropping->y - circle_y;
-	int cropping_circle_y2 = cropping->y + cropping->height - circle_y;
+	int cropping_circle_y1 = cropping->y - y - radius;
+	int cropping_circle_y2 = cropping->y + cropping->height - height - y + radius;
 
 	int tmp = 0;
-	int cropping_circle_x1 = cropping->x - circle_x;
-	int cropping_circle_x2 = cropping->x + cropping->width - circle_x;
+	int cropping_circle_x1 = cropping->x - x - radius;
+	int cropping_circle_x2 = cropping->x + cropping->width - width - x + radius;
 
-	if (radius > abs(cropping_circle_x2))
+	bool crop_top_right = false;
+	bool crop_top_left = false;
+	bool crop_bottom_left = false;
+	bool crop_bottom_right = false;
+
+	if ((cropping->x + cropping->width < x + width)
+		&& (cropping->x + cropping->width > x)
+		&& (cropping->y < y + height)
+		&& (cropping->y + cropping->height > y))
 	{
 		tmp = isqrt(
 			(radius * radius)
 			- (cropping_circle_x2 * cropping_circle_x2));
 
-		if ((-tmp > cropping_circle_y1)
-			&& (-tmp < cropping_circle_y2))
+		if (crop_top_right == false)
 		{
-			intersections[intersections_count] = cropping_circle_x2;
+			intersections[intersections_count] = cropping_circle_x2 + width - radius;
 			++intersections_count;
-			intersections[intersections_count] = -tmp;
+			intersections[intersections_count] = radius - tmp;
 			++intersections_count;
-		}
-
-		// corner
-		if (radius > abs(cropping_circle_y1))
-		{
-			intersections[intersections_count] = cropping_circle_x2;
-			++intersections_count;
-			intersections[intersections_count] = cropping_circle_y1;
-			++intersections_count;
+			crop_top_right = true;
 		}
 	}
 
-	if (radius > abs(cropping_circle_y1))
+	if ((cropping->y < y + height)
+		&& (cropping->y > y)
+		&& (cropping->x < x + width)
+		&& (cropping->x + cropping->width > x))
 	{
 		tmp = isqrt(
 			(radius * radius)
 			- (cropping_circle_y1 * cropping_circle_y1));
 
-		if ((tmp > cropping_circle_x1)
-			&& (tmp < cropping_circle_x2))
+		if (crop_top_right == false)
 		{
-			intersections[intersections_count] = tmp;
+			intersections[intersections_count] = tmp + width - radius;
 			++intersections_count;
-			intersections[intersections_count] = cropping_circle_y1;
+			intersections[intersections_count] = radius + cropping_circle_y1;
 			++intersections_count;
+			crop_top_right = true;
 		}
 
-		if ((-tmp > cropping_circle_x1)
-			&& (-tmp < cropping_circle_x2))
+		if (crop_top_left == false)
 		{
-			intersections[intersections_count] = -tmp;
+			intersections[intersections_count] = width - tmp - radius;
 			++intersections_count;
-			intersections[intersections_count] = cropping_circle_y1;
+			intersections[intersections_count] = radius + cropping_circle_y1;
 			++intersections_count;
-		}
-
-		// corner
-		if (radius > abs(cropping_circle_x1))
-		{
-			intersections[intersections_count] = cropping_circle_x1;
-			++intersections_count;
-			intersections[intersections_count] = cropping_circle_y1;
-			++intersections_count;
+			crop_top_left = true;
 		}
 	}
 
-	if (radius > abs(cropping_circle_x1))
+	if ((cropping->x < x + width)
+		&& (cropping->x > x)
+		&& (cropping->y < y + height)
+		&& (cropping->y + cropping->height > y))
 	{
 		tmp = isqrt(
 			(radius * radius)
 			- (cropping_circle_x1 * cropping_circle_x1));
 
-		if ((-tmp > cropping_circle_y1)
-			&& (-tmp < cropping_circle_y2))
+		if (crop_top_left == false)
 		{
-			intersections[intersections_count] = cropping_circle_x1;
+			intersections[intersections_count] = radius + cropping_circle_x1;
 			++intersections_count;
-			intersections[intersections_count] = -tmp;
+			intersections[intersections_count] = height - tmp - radius;
 			++intersections_count;
+			crop_top_left = true;
 		}
 
-		if ((tmp > cropping_circle_y1)
-			&& (tmp < cropping_circle_y2))
+		if (crop_bottom_left == false)
 		{
-			intersections[intersections_count] = cropping_circle_x1;
+			intersections[intersections_count] = radius + cropping_circle_x1;
 			++intersections_count;
-			intersections[intersections_count] = tmp;
+			intersections[intersections_count] = tmp + height - radius;
 			++intersections_count;
-		}
-
-		// corner
-		if (radius > abs(cropping_circle_y2))
-		{
-			intersections[intersections_count] = cropping_circle_x1;
-			++intersections_count;
-			intersections[intersections_count] = cropping_circle_y2;
-			++intersections_count;
+			crop_bottom_left = true;
 		}
 	}
 
-	if (radius > abs(cropping_circle_y2))
+	if ((cropping->y + cropping->height < y + height)
+		&& (cropping->y + cropping->height > y)
+		&& (cropping->x < x + width)
+		&& (cropping->x + cropping->width > x))
 	{
 		tmp = isqrt(
 			(radius * radius)
 			- (cropping_circle_y2 * cropping_circle_y2));
 
-		if ((-tmp > cropping_circle_x1)
-			&& (-tmp < cropping_circle_x2))
+		if (crop_bottom_left == false)
 		{
-			intersections[intersections_count] = -tmp;
+			intersections[intersections_count] = radius - tmp;
 			++intersections_count;
-			intersections[intersections_count] = cropping_circle_y2;
+			intersections[intersections_count] = cropping_circle_y2 + height - radius;
 			++intersections_count;
+			crop_bottom_left = true;
 		}
 
-		if ((tmp > cropping_circle_x1)
-			&& (tmp < cropping_circle_x2))
+		if (crop_bottom_right == false)
 		{
-			intersections[intersections_count] = tmp;
+			intersections[intersections_count] = radius + tmp;
 			++intersections_count;
-			intersections[intersections_count] = cropping_circle_y2;
+			intersections[intersections_count] = cropping_circle_y2 + height - radius;
 			++intersections_count;
-		}
-
-		// corner
-		if (radius > abs(cropping_circle_x2))
-		{
-			intersections[intersections_count] = cropping_circle_x2;
-			++intersections_count;
-			intersections[intersections_count] = cropping_circle_y2;
-			++intersections_count;
+			crop_bottom_right = true;
 		}
 	}
 
-	if (radius > abs(cropping_circle_x2))
+	if ((cropping->x + cropping->width < x + width)
+		&& (cropping->x + cropping->width > x)
+		&& (cropping->y < y + height)
+		&& (cropping->y + cropping->height > y))
 	{
 		tmp = isqrt(
 			(radius * radius)
 			- (cropping_circle_x2 * cropping_circle_x2));
 
-		if ((tmp > cropping_circle_y1)
-			&& (tmp < cropping_circle_y2))
+		if (crop_bottom_right == false)
 		{
-			intersections[intersections_count] = cropping_circle_x2;
+			intersections[intersections_count] = cropping_circle_x2 + width - radius;
 			++intersections_count;
-			intersections[intersections_count] = tmp;
+			intersections[intersections_count] = tmp + height - radius;
 			++intersections_count;
+			crop_bottom_right = true;
 		}
 	}
 
@@ -268,7 +197,7 @@ int rzb_helper_crop_circle(
 
 // midpoint circle algorithm with very fast anti-aliasing
 // (thanks to integer math and Xiaolin Wu's amazing ideas)
-void rzb_helper_cricle_pixel_centered(
+void rzb_helper_circle_pixel_centered(
 	uint32_t* argb,
 	int argb_width,
 	uint32_t color,
@@ -367,7 +296,7 @@ void rzb_helper_cricle_pixel_centered(
 
 // same diy circle routine but moving the origin
 // to the bottom-right corner of the target pixel
-void rzb_helper_cricle_cross_centered(
+void rzb_helper_circle_cross_centered(
 	uint32_t* argb,
 	int argb_width,
 	uint32_t color,
@@ -1006,7 +935,7 @@ void rzb_helper_render_cropped_circle(
 
 	if (offset > 0)
 	{
-		rzb_helper_cricle_pixel_centered(
+		rzb_helper_circle_pixel_centered(
 			buffer,
 			2 * radius + offset,
 			color,
@@ -1016,7 +945,7 @@ void rzb_helper_render_cropped_circle(
 	}
 	else
 	{
-		rzb_helper_cricle_cross_centered(
+		rzb_helper_circle_cross_centered(
 			buffer,
 			2 * radius,
 			color,
@@ -1054,10 +983,12 @@ void rzb_helper_render_circle(
 	int intersections[24] = {0};
 
 	int intersections_count =
-		rzb_helper_crop_circle(
+		rzb_helper_crop_rounded_rectangle(
+			circle_x - radius,
+			circle_y - radius,
+			radius * 2,
+			radius * 2,
 			radius,
-			circle_x,
-			circle_y,
 			cropping,
 			intersections);
 
@@ -1070,7 +1001,7 @@ void rzb_helper_render_circle(
 		{
 			if (offset > 0)
 			{
-				rzb_helper_cricle_pixel_centered(
+				rzb_helper_circle_pixel_centered(
 					argb,
 					argb_width,
 					color,
@@ -1080,7 +1011,7 @@ void rzb_helper_render_circle(
 			}
 			else
 			{
-				rzb_helper_cricle_cross_centered(
+				rzb_helper_circle_cross_centered(
 					argb,
 					argb_width,
 					color,
@@ -1099,23 +1030,23 @@ void rzb_helper_render_circle(
 
 		for (int i = 0; i < intersections_count; i += 2)
 		{
-			if ((circle_x + intersections[i])
+			if ((circle_x + intersections[i] - radius)
 				== cropping->x)
 			{
 				buffer_x1 = cropping->x;
 			}
-			else if ((circle_x + intersections[i])
+			else if ((circle_x + intersections[i] - radius)
 				== (cropping->x + cropping->width))
 			{
 				buffer_x2 = cropping->x + cropping->width - offset;
 			}
 
-			if ((circle_y + intersections[i + 1])
+			if ((circle_y + intersections[i + 1] - radius)
 				== cropping->y)
 			{
 				buffer_y1 = cropping->y;
 			}
-			else if ((circle_y + intersections[i + 1])
+			else if ((circle_y + intersections[i + 1] - radius)
 				== (cropping->y + cropping->height))
 			{
 				buffer_y2 = cropping->y + cropping->height - offset;
@@ -1135,4 +1066,542 @@ void rzb_helper_render_circle(
 			offset,
 			color);
 	}
+}
+
+void rzb_helper_render_cropped_rounded_rectangle(
+	uint32_t* argb,
+	int argb_width,
+	int buffer_x1,
+	int buffer_x2,
+	int buffer_y1,
+	int buffer_y2,
+	int pos_x,
+	int pos_y,
+	int width,
+	int height,
+	int radius,
+	bool tab,
+	uint32_t color)
+{
+	uint32_t* buffer =
+		malloc((2 * radius)
+			* (2 * radius)
+			* (sizeof (uint32_t)));
+
+	int size_x1 = pos_x + radius - buffer_x1;
+
+	if (size_x1 > (buffer_x2 - pos_x))
+	{
+		size_x1 = buffer_x2 - pos_x;
+	}
+
+	if (size_x1 < 0)
+	{
+		size_x1 = 0;
+	}
+
+	int size_x2 = buffer_x2 + radius - pos_x - width;
+	int x1 = 0;
+
+	if (size_x2 > pos_x + width - buffer_x1)
+	{
+		size_x2 = pos_x + width - buffer_x1;
+		x1 = radius - size_x2;
+	}
+
+	if (size_x2 < 0)
+	{
+		size_x2 = 0;
+	}
+
+	for (int y = buffer_y1; y < pos_y + radius; ++y)
+	{
+		memcpy(
+			buffer
+				+ ((y - pos_y) * (2 * radius))
+				+ buffer_x1 - pos_x,
+			argb
+				+ y * argb_width
+				+ buffer_x1,
+			size_x1
+				* (sizeof (uint32_t)));
+
+		memcpy(
+			buffer
+				+ ((y - pos_y) * (2 * radius))
+				+ x1 + radius,
+			argb
+				+ y * argb_width
+				+ pos_x + width - radius + x1,
+			size_x2
+				* (sizeof (uint32_t)));
+	}
+
+	for (int y = pos_y + height - radius; y < buffer_y2; ++y)
+	{
+		memcpy(
+			buffer
+				+ ((y + (2 * radius) - pos_y - height) * (2 * radius))
+				+ buffer_x1 - pos_x,
+			argb
+				+ y * argb_width
+				+ buffer_x1,
+			size_x1
+				* (sizeof (uint32_t)));
+
+		memcpy(
+			buffer
+				+ ((y + (2 * radius) - pos_y - height) * (2 * radius))
+				+ x1 + radius,
+			argb
+				+ y * argb_width
+				+ pos_x + width - radius + x1,
+			size_x2
+				* (sizeof (uint32_t)));
+	}
+
+	rzb_helper_circle_cross_centered(
+		buffer,
+		2 * radius,
+		color,
+		radius,
+		radius,
+		radius);
+
+	for (int y = buffer_y1; y < buffer_y2; ++y)
+	{
+		for (int x = buffer_x1; x < buffer_x2; ++x)
+		{
+			pixel_set(
+				argb,
+				argb_width,
+				x,
+				y,
+				(color >> 16) & 0xff,
+				(color >> 8) & 0xff,
+				color & 0xff,
+				color >> 24);
+		}
+	}
+
+	int y1;
+
+	if ((pos_y + radius) > buffer_y2)
+	{
+		y1 = buffer_y2;
+	}
+	else
+	{
+		y1 = pos_y + radius;
+	}
+
+	for (int y = buffer_y1; y < y1; ++y)
+	{
+		memcpy(
+			argb
+				+ y * argb_width
+				+ buffer_x1,
+			buffer
+				+ ((y - pos_y) * (2 * radius))
+				+ buffer_x1 - pos_x,
+			size_x1
+				* (sizeof (uint32_t)));
+
+		memcpy(
+			argb
+				+ y * argb_width
+				+ pos_x + width - radius + x1,
+			buffer
+				+ ((y - pos_y) * (2 * radius))
+				+ x1 + radius,
+			size_x2
+				* (sizeof (uint32_t)));
+	}
+
+	if (tab == true)
+	{
+		free(buffer);
+		return;
+	}
+
+	int y2;
+
+	if ((pos_y + height - radius) < buffer_y1)
+	{
+		y2 = buffer_y1;
+	}
+	else
+	{
+		y2 = pos_y + height - radius;
+	}
+
+	for (int y = y2; y < buffer_y2; ++y)
+	{
+		memcpy(
+			argb
+				+ y * argb_width
+				+ buffer_x1,
+			buffer
+				+ ((y + (2 * radius) - pos_y - height) * (2 * radius))
+				+ buffer_x1 - pos_x,
+			size_x1
+				* (sizeof (uint32_t)));
+
+		memcpy(
+			argb
+				+ y * argb_width
+				+ pos_x + width - radius + x1,
+			buffer
+				+ ((y + (2 * radius) - pos_y - height) * (2 * radius))
+				+ x1 + radius,
+			size_x2
+				* (sizeof (uint32_t)));
+	}
+}
+
+void rzb_helper_render_rounded_rectangle(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	int radius,
+	bool tab,
+	uint32_t color)
+{
+	int intersections[24] = {0};
+
+	int intersections_count =
+		rzb_helper_crop_rounded_rectangle(
+			x,
+			y,
+			width,
+			height,
+			radius,
+			cropping,
+			intersections);
+
+	int buffer_x1 = x;
+	int buffer_y1 = y;
+	int buffer_x2 = x + width;
+	int buffer_y2 = y + height;
+
+	if (intersections_count == 0)
+	{
+		if ((x >= cropping->x)
+		&& ((x + width) <= (cropping->x + cropping->width))
+		&& (y >= cropping->y)
+		&& ((y + height) <= (cropping->y + cropping->height)))
+		{
+			rzb_helper_render_cropped_rounded_rectangle(
+				argb,
+				argb_width,
+				buffer_x1,
+				buffer_x2,
+				buffer_y1,
+				buffer_y2,
+				x,
+				y,
+				width,
+				height,
+				radius,
+				tab,
+				color);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < intersections_count; i += 2)
+		{
+			if ((x + intersections[i])
+				== cropping->x)
+			{
+				buffer_x1 = cropping->x;
+			}
+			else if ((x + intersections[i])
+				== (cropping->x + cropping->width))
+			{
+				buffer_x2 = cropping->x + cropping->width;
+			}
+
+			if ((y + intersections[i + 1])
+				== cropping->y)
+			{
+				buffer_y1 = cropping->y;
+			}
+			else if ((y + intersections[i + 1])
+				== (cropping->y + cropping->height))
+			{
+				buffer_y2 = cropping->y + cropping->height;
+			}
+		}
+
+		rzb_helper_render_cropped_rounded_rectangle(
+			argb,
+			argb_width,
+			buffer_x1,
+			buffer_x2,
+			buffer_y1,
+			buffer_y2,
+			x,
+			y,
+			width,
+			height,
+			radius,
+			tab,
+			color);
+	}
+}
+
+void rzb_helper_render_arrow_horizontal(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x1,
+	int x2,
+	int y,
+	int size,
+	uint32_t color)
+{
+	uint8_t color_r = (color >> 16) & 0xFF;
+	uint8_t color_g = (color >> 8) & 0xFF;
+	uint8_t color_b = color & 0xFF;
+
+	// buffer info
+	int buffer_size = size + 2;
+	int center = size / 3;
+
+	int half_size = size / 2;
+	int odd = size % 2;
+
+	uint32_t* buffer = malloc(buffer_size * buffer_size * (sizeof (uint32_t)));
+
+	// cropping values
+	int crop_y = 1;
+	int crop_height = size;
+
+	int crop_x1 = 0;
+	int crop_width1 = half_size + (1 + odd);
+
+	int crop_x2 = half_size + odd;
+	int crop_width2 = half_size + (1 + odd);
+
+	// cropping the first arrow horizontally
+	if (cropping->x > (x1 - center + half_size + 1))
+	{
+		crop_width1 = 0;
+	}
+	else if (cropping->x > (x1 - center))
+	{
+		crop_x1 = cropping->x - x1 + center;
+		crop_width1 = half_size + (1 + odd) - crop_x1;
+	}
+
+	if ((cropping->x + cropping->width) < (x1 - center))
+	{
+		crop_width1 = 0;
+	}
+	else if ((cropping->x + cropping->width) < (x1 - center + half_size + 1 + odd))
+	{
+		crop_width1 = cropping->x + cropping->width - (x1 + crop_x1 - center);
+	}
+
+	// cropping the second arrow horizontally
+	if (cropping->x > (x2 + center + odd - 1))
+	{
+		crop_width2 = 0;
+	}
+	else if (cropping->x > (x2 + center - odd - 1 - half_size))
+	{
+		crop_x2 = cropping->x - x2 - center + 2 * (half_size + odd) + 1;
+		crop_width2 = 2 * (half_size + odd) + 1 - crop_x2;
+	}
+
+	if ((cropping->x + cropping->width) < (x2 + center - half_size - odd - 1))
+	{
+		crop_width2 = 0;
+	}
+	else if ((cropping->x + cropping->width) < (x2 + center))
+	{
+		crop_width2 = cropping->x + cropping->width - (crop_x2 + x2 + center - 2 * (half_size + odd) - 1);
+	}
+
+	// cropping vertically
+	if (cropping->y > (y + half_size + odd))
+	{
+		crop_height = 0;
+	}
+	else if (cropping->y > (y - half_size - odd))
+	{
+		crop_y = cropping->y - (y - half_size - odd);
+		crop_height = size - crop_y + 1;
+	}
+
+	if ((cropping->y + cropping->height) < (y - half_size - odd))
+	{
+		crop_height = 0;
+	}
+	else if ((cropping->y + cropping->height) < (y + half_size + 1))
+	{
+		crop_height = cropping->y + cropping->height - (crop_y + y - half_size - odd);
+	}
+
+	// copy relevant background sections in temporary buffer
+	for (int pos_y = crop_y; pos_y < (crop_y + crop_height); ++pos_y)
+	{
+		memcpy(
+			buffer + (pos_y * buffer_size) + crop_x1,
+			argb + (y + pos_y - half_size - odd) * argb_width + (x1 + crop_x1 - center),
+			crop_width1 * (sizeof (uint32_t)));
+
+		memcpy(
+			buffer + (pos_y * buffer_size) + crop_x2 + (1 - odd),
+			argb + (y + pos_y - half_size - odd) * argb_width + (x2 + crop_x2 + center - 2 * (half_size + odd) - 1),
+			crop_width2 * (sizeof (uint32_t)));
+	}
+
+	// render arrows
+	for (int pos_y = 0; pos_y < (half_size + (1 - odd)); ++pos_y)
+	{
+		// render all opaque pixels except the middle horizontal line for odd bases
+		for (int pos_x = 0; pos_x < ((2 * pos_y) + odd); ++pos_x)
+		{
+			pixel_set(
+				buffer,
+				buffer_size,
+				half_size - pos_y + pos_x + 1,
+				pos_y + odd,
+				color_r,
+				color_g,
+				color_b,
+				0xFF);
+
+			pixel_set(
+				buffer,
+				buffer_size,
+				half_size - pos_y + pos_x + 1,
+				size - pos_y + (1 - odd),
+				color_r,
+				color_g,
+				color_b,
+				0xFF);
+		}
+
+		// render all the anti-aliasing except that of the tips of odd bases
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size - pos_y,
+			pos_y + odd,
+			color_r,
+			color_g,
+			color_b,
+			0x60);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size + pos_y + (1 + odd),
+			pos_y + odd,
+			color_r,
+			color_g,
+			color_b,
+			0x60);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size - pos_y,
+			size - pos_y + (1 - odd),
+			color_r,
+			color_g,
+			color_b,
+			0x60);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size + pos_y + (1 + odd),
+			size - pos_y + (1 - odd),
+			color_r,
+			color_g,
+			color_b,
+			0x60);
+	}
+
+	if (odd)
+	{
+		// render the middle horizontal line of odd bases
+		for (int pos = 0; pos < size; ++pos)
+		{
+			pixel_set(
+				buffer,
+				buffer_size,
+				pos + 1,
+				half_size + 1,
+				color_r,
+				color_g,
+				color_b,
+				0xFF);
+		}
+
+		// render the tips of odd bases
+		pixel_set(
+			buffer,
+			buffer_size,
+			buffer_size - 1,
+			half_size + 1,
+			color_r,
+			color_g,
+			color_b,
+			0x40);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size + 1,
+			0,
+			color_r,
+			color_g,
+			color_b,
+			0x40);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			0,
+			half_size + 1,
+			color_r,
+			color_g,
+			color_b,
+			0x40);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size + 1,
+			buffer_size - 1,
+			color_r,
+			color_g,
+			color_b,
+			0x40);
+	}
+
+	// copy temporary buffer back to the main buffer respecting the cropping values
+	for (int pos_y = crop_y; pos_y < (crop_y + crop_height); ++pos_y)
+	{
+		memcpy(
+			argb + (y + pos_y - half_size - odd) * argb_width + (x1 + crop_x1 - center),
+			buffer + (pos_y * buffer_size) + crop_x1,
+			crop_width1 * (sizeof (uint32_t)));
+
+		memcpy(
+			argb + (y + pos_y - half_size - odd) * argb_width + (x2 + crop_x2 + center - 2 * (half_size + odd) - 1),
+			buffer + (pos_y * buffer_size) + crop_x2 + (1 - odd),
+			crop_width2 * (sizeof (uint32_t)));
+	}
+
+	free(buffer);
 }

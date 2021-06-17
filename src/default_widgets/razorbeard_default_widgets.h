@@ -29,6 +29,8 @@ struct rzb_default_widgets_sizes
 	int size_separator;
 	// size of the resizing corner of the text areas
 	int size_textarea_corner;
+	// size of the flat part of the arrow
+	int size_arrow_base;
 
 	// thickness of the textbox scrollbar
 	int size_textbox_scrollbar;
@@ -39,6 +41,8 @@ struct rzb_default_widgets_sizes
 	int size_tab_separator;
 	// space between the tips of the separator and the limits of the tab area
 	int padding_tab_separator;
+	// space between the tab navigation button and the tab bar
+	int padding_tab_button;
 
 	// thickness of the handles
 	int size_handle;
@@ -192,6 +196,7 @@ struct rzb_widget*
 		struct rzb_default_widgets_context* context,
 		void (*tab_switched)(struct rzb*, struct rzb_widget*),
 		char** tabs_names,
+		int tabs_count,
 		int tab_active);
 
 void rzb_free_widget_tabs(
@@ -222,7 +227,9 @@ struct rzb_widget_tabs
 	void (*tab_switched)(struct rzb*, struct rzb_widget*);
 
 	char** tabs_names;
+	int tabs_count;
 	int tab_active;
+	int tab_first_visible;
 };
 
 // popup
