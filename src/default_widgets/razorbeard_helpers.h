@@ -59,6 +59,15 @@ void rzb_helper_ring_cross_centered(
 	int ro,
 	int ri);
 
+void rzb_helper_render_gradient_radial(
+	uint32_t* argb,
+	int argb_width,
+	uint32_t color,
+	int ox,
+	int oy,
+	int ro,
+	int ri);
+
 void rzb_helper_crop_rectangle(
 	int pos,
 	int size,
@@ -113,6 +122,18 @@ void rzb_helper_render_hollow_rectangle(
 	int radius,
 	int thickness,
 	bool tab,
+	uint32_t color);
+
+void rzb_helper_render_shadow_rectangle(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	int radius,
+	int thickness,
 	uint32_t color);
 
 void rzb_helper_render_arrow_horizontal(
