@@ -1,5 +1,3 @@
-// TODO only implement rings without inner anti-aliasing
-// TODO always render everything from back to front
 // TODO render the buttons by first rendering an opaque rectangular gradient
 // TODO render the circularly cropped gradients as a post-process step
 //      using a dedicated function that provides its own tmp buffer
@@ -1650,25 +1648,6 @@ void rzb_helper_render_cropped_hollow_rectangle(
 		buffer_y1,
 		buffer_y2);
 
-	// down
-	border_pos_x = pos_x + radius;
-	border_pos_y = pos_y + height - thickness;
-	border_width = width - (2 * radius);
-	border_height = thickness;
-
-	rzb_helper_render_border(
-		argb,
-		argb_width,
-		color,
-		border_pos_x,
-		border_pos_y,
-		border_width,
-		border_height,
-		buffer_x1,
-		buffer_x2,
-		buffer_y1,
-		buffer_y2);
-
 	int y1;
 
 	if ((pos_y + radius) > buffer_y2)
@@ -1708,6 +1687,25 @@ void rzb_helper_render_cropped_hollow_rectangle(
 		free(buffer);
 		return;
 	}
+
+	// down
+	border_pos_x = pos_x + radius;
+	border_pos_y = pos_y + height - thickness;
+	border_width = width - (2 * radius);
+	border_height = thickness;
+
+	rzb_helper_render_border(
+		argb,
+		argb_width,
+		color,
+		border_pos_x,
+		border_pos_y,
+		border_width,
+		border_height,
+		buffer_x1,
+		buffer_x2,
+		buffer_y1,
+		buffer_y2);
 
 	int y2;
 
