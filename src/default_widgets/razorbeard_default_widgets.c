@@ -29,7 +29,7 @@ bool rzb_default_widgets_init(
 		.size_font = 10,
 
 		.size_shine_edge = 1,
-		.size_shine_gradient = 15,
+		.size_shine_gradient = 7,
 		.radius_edge_border = 3,
 
 		.size_slider = 6,
@@ -65,7 +65,7 @@ bool rzb_default_widgets_init(
 		.size_font = 12,
 
 		.size_shine_edge = 1,
-		.size_shine_gradient = 30,
+		.size_shine_gradient = 14,
 		.radius_edge_border = 4,
 
 		.size_slider = 8,
@@ -101,7 +101,7 @@ bool rzb_default_widgets_init(
 		.size_font = 18,
 
 		.size_shine_edge = 2,
-		.size_shine_gradient = 45,
+		.size_shine_gradient = 21,
 		.radius_edge_border = 7,
 
 		.size_slider = 12,
@@ -142,6 +142,7 @@ bool rzb_default_widgets_init(
 	context->color_foreground = 0xff191919;
 	context->color_background_box = 0xff232323;
 	context->color_foreground_shine = 0xff1e1e1e;
+	context->color_foreground_shine_gradient = 0xff1d1d1d;
 
 	return true;
 }
@@ -1357,6 +1358,80 @@ void rzb_render_widget_button(
 {
 	struct rzb_default_widgets_context* context = widget->data_widget;
 
+	// render bottom infill with gradient
+	rzb_helper_render_gradient_solid(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x + context->sizes_current->size_edge_border,
+		widget->y + widget->height
+			- context->sizes_current->size_edge_border
+			- context->sizes_current->size_shine_gradient,
+		widget->width
+			- (2 * context->sizes_current->size_edge_border),
+		context->sizes_current->size_shine_gradient,
+		context->color_foreground,
+		context->color_foreground_shine_gradient);
+
+	// render bottom-left and bottom-right border corners
+	rzb_helper_render_bottom_corners(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x,
+		widget->y
+			+ widget->height
+			- context->sizes_current->radius_edge_border,
+		widget->width,
+		context->sizes_current->radius_edge_border,
+		context->sizes_current->radius_edge_border,
+		context->sizes_current->size_edge_border,
+		false,
+		context->color_edge,
+		context->color_background);
+
+	// render bottom border
+	int border_pos_x =
+		widget->x
+		+ context->sizes_current->radius_edge_border;
+
+	int border_pos_y =
+		widget->y
+		+ widget->height
+		- context->sizes_current->size_edge_border;
+
+	int border_width =
+		widget->width
+		- (2 * context->sizes_current->radius_edge_border);
+
+	int border_height =
+		context->sizes_current->size_edge_border;
+
+	rzb_helper_crop_rectangle(
+		border_pos_x,
+		border_width,
+		cropping->x,
+		cropping->width,
+		&border_pos_x,
+		&border_width);
+
+	rzb_helper_crop_rectangle(
+		border_pos_y,
+		border_height,
+		cropping->y,
+		cropping->height,
+		&border_pos_y,
+		&border_height);
+
+	for (int x = border_pos_x; x < (border_pos_x + border_width); ++x)
+	{
+		for (int y = border_pos_y; y < (border_pos_y + border_height); ++y)
+		{
+			rzb->argb[y * rzb->argb_width + x] = context->color_edge;
+		}
+	}
+
+	// render top and size borders with up-left and up-right corners
 	rzb_helper_render_hollow_rectangle(
 		rzb->argb,
 		rzb->argb_width,
@@ -1367,9 +1442,10 @@ void rzb_render_widget_button(
 		widget->height,
 		context->sizes_current->radius_edge_border,
 		context->sizes_current->size_edge_border,
-		false,
+		true,
 		context->color_edge);
 
+	// render shine border
 	rzb_helper_render_hollow_rectangle(
 		rzb->argb,
 		rzb->argb_width,
@@ -1384,6 +1460,7 @@ void rzb_render_widget_button(
 		true,
 		context->color_foreground_shine);
 
+	// render top infill
 	rzb_helper_render_rounded_rectangle(
 		rzb->argb,
 		rzb->argb_width,
@@ -1395,9 +1472,10 @@ void rzb_render_widget_button(
 			- (2 * context->sizes_current->size_edge_border),
 		widget->height
 			- (2 * context->sizes_current->size_edge_border)
-			- context->sizes_current->size_shine_edge,
+			- context->sizes_current->size_shine_edge
+			- context->sizes_current->size_shine_gradient,
 		context->sizes_current->radius_edge_border - context->sizes_current->size_edge_border,
-		false,
+		true,
 		context->color_foreground);
 }
 

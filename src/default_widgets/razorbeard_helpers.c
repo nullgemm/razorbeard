@@ -1,7 +1,3 @@
-// TODO render the buttons by first rendering an opaque rectangular gradient
-// TODO render the circularly cropped gradients as a post-process step
-//      using a dedicated function that provides its own tmp buffer
-
 #include "razorbeard_helpers.h"
 #include "razorbeard_math.h"
 
@@ -418,6 +414,86 @@ void rzb_helper_circle_cross_centered(
 	pixel_set(argb, argb_width, ox - x    , oy - y    , color_r, color_g, color_b, color_a * a / 0xFF);
 }
 
+void rzb_helper_circle_inverted(
+	uint32_t* argb,
+	int argb_width,
+	uint32_t color,
+	int ox,
+	int oy,
+	int r)
+{
+	r += 1;
+
+	int i;
+	int a;
+	int x = 1;
+	int y = r - 1;
+	int r2 = r * r;
+
+	int color_a = color >> 24;
+	int color_r = (color >> 16) & 0xFF;
+	int color_g = (color >> 8) & 0xFF;
+	int color_b = color & 0xFF;
+
+	while (x < y)
+	{
+		a = 0xFF - ((0xFF * r) - ((0xFF * isqrt(((y * y) + (x * x)) << 16)) >> 8));
+
+		if (a < 0)
+		{
+			a = -a;
+		}
+
+		// set antialiased NNE, NNW, SSE, SSW octants
+		pixel_set(argb, argb_width, ox + x - 1, oy + y - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox - x    , oy + y - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox + x - 1, oy - y    , color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox - x    , oy - y    , color_r, color_g, color_b, color_a * a / 0xFF);
+
+		// set antialiased ENE, ESE, WNW, WSW octants
+		pixel_set(argb, argb_width, ox + y - 1, oy + x - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox - y    , oy + x - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox + y - 1, oy - x    , color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox - y    , oy - x    , color_r, color_g, color_b, color_a * a / 0xFF);
+
+		// fill diagonals
+		pixel_set(argb, argb_width, ox + y - 1, oy + y - 1, color_r, color_g, color_b, color_a);
+		pixel_set(argb, argb_width, ox + y - 1, oy - y    , color_r, color_g, color_b, color_a);
+		pixel_set(argb, argb_width, ox - y    , oy + y - 1, color_r, color_g, color_b, color_a);
+		pixel_set(argb, argb_width, ox - y    , oy - y    , color_r, color_g, color_b, color_a);
+
+		// fill the reset of the circle
+		for (i = x; i <= y; ++i)
+		{
+			pixel_set(argb, argb_width, ox + i - 1, oy - y - 1, color_r, color_g, color_b, color_a);
+			pixel_set(argb, argb_width, ox + i - 1, oy + y    , color_r, color_g, color_b, color_a);
+			pixel_set(argb, argb_width, ox - i    , oy - y - 1, color_r, color_g, color_b, color_a);
+			pixel_set(argb, argb_width, ox - i    , oy + y    , color_r, color_g, color_b, color_a);
+
+			pixel_set(argb, argb_width, ox + y    , oy - i    , color_r, color_g, color_b, color_a);
+			pixel_set(argb, argb_width, ox + y    , oy + i - 1, color_r, color_g, color_b, color_a);
+			pixel_set(argb, argb_width, ox - y - 1, oy - i    , color_r, color_g, color_b, color_a);
+			pixel_set(argb, argb_width, ox - y - 1, oy + i - 1, color_r, color_g, color_b, color_a);
+		}
+
+		if (((x + 1) * (x + 1) + (y * y)) > r2)
+		{
+			--y;
+			++x;
+		}
+		else
+		{
+			++x;
+		}
+	}
+
+	// corner pixels
+	pixel_set(argb, argb_width, ox + r - 1, oy + r - 1, color_r, color_g, color_b, color_a);
+	pixel_set(argb, argb_width, ox - r    , oy + r - 1, color_r, color_g, color_b, color_a);
+	pixel_set(argb, argb_width, ox + r - 1, oy - r    , color_r, color_g, color_b, color_a);
+	pixel_set(argb, argb_width, ox - r    , oy - r    , color_r, color_g, color_b, color_a);
+}
+
 void rzb_helper_ring_pixel_centered(
 	uint32_t* argb,
 	int argb_width,
@@ -685,6 +761,149 @@ void rzb_helper_ring_cross_centered(
 	pixel_set(argb, argb_width, ox - xi    , oy + yi - 1, color_r, color_g, color_b, 0xFF);
 	pixel_set(argb, argb_width, ox + xi - 1, oy - yi    , color_r, color_g, color_b, 0xFF);
 	pixel_set(argb, argb_width, ox - xi    , oy - yi    , color_r, color_g, color_b, 0xFF);
+}
+
+void rzb_helper_ring_cross_centered_inverted(
+	uint32_t* argb,
+	int argb_width,
+	uint32_t color,
+	int ox,
+	int oy,
+	int ro,
+	int ri)
+{
+	int color_a = color >> 24;
+	int color_r = (color >> 16) & 0xFF;
+	int color_g = (color >> 8) & 0xFF;
+	int color_b = color & 0xFF;
+
+	ro += 1;
+	ri += 1;
+
+	int32_t i;
+	int32_t a;
+
+	int32_t x = 1;
+	int32_t y = ro - 1;
+
+	int32_t xi = 1;
+	int32_t yi = ri - 1;
+
+	int32_t ro2 = ro * ro;
+	int32_t ri2 = ri * ri;
+
+	while (x < y)
+	{
+		a = 0xFF - ((0xFF * ri) - ((0xFF * isqrt(((yi * yi) + (xi * xi)) << 16)) >> 8));
+
+		if (a < 0)
+		{
+			a = -a;
+		}
+
+		// set antialiased NNE, NNW, SSE, SSW octants
+		pixel_set(argb, argb_width, ox + x - 1, oy + y - 1, color_r, color_g, color_b, 0xFF);
+		pixel_set(argb, argb_width, ox - x    , oy + y - 1, color_r, color_g, color_b, 0xFF);
+		pixel_set(argb, argb_width, ox + x - 1, oy - y    , color_r, color_g, color_b, 0xFF);
+		pixel_set(argb, argb_width, ox - x    , oy - y    , color_r, color_g, color_b, 0xFF);
+
+		// set antialiased ENE, ESE, WNW, WSW octants
+		pixel_set(argb, argb_width, ox + y - 1, oy + x - 1, color_r, color_g, color_b, 0xFF);
+		pixel_set(argb, argb_width, ox - y    , oy + x - 1, color_r, color_g, color_b, 0xFF);
+		pixel_set(argb, argb_width, ox + y - 1, oy - x    , color_r, color_g, color_b, 0xFF);
+		pixel_set(argb, argb_width, ox - y    , oy - x    , color_r, color_g, color_b, 0xFF);
+
+		if (xi < yi)
+		{
+			// set antialiased NNE, NNW, SSE, SSW octants
+			pixel_set(argb, argb_width, ox + xi - 1, oy + yi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox - xi    , oy + yi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox + xi - 1, oy - yi    , color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox - xi    , oy - yi    , color_r, color_g, color_b, color_a * a / 0xFF);
+
+			// set antialiased ENE, ESE, WNW, WSW octants
+			pixel_set(argb, argb_width, ox + yi - 1, oy + xi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox - yi    , oy + xi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox + yi - 1, oy - xi    , color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox - yi    , oy - xi    , color_r, color_g, color_b, color_a * a / 0xFF);
+
+			// fill the rest of the circle
+			for (i = yi + 1; i < y; ++i)
+			{
+				pixel_set(argb, argb_width, ox + xi - 1, oy + i - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - xi    , oy - i    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + xi - 1, oy - i    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - xi    , oy + i - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + i - 1, oy + xi - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - i    , oy - xi    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + i - 1, oy - xi    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - i    , oy + xi - 1, color_r, color_g, color_b, 0xFF);
+			}
+
+			if (((xi + 1) * (xi + 1) + (yi * yi)) > ri2)
+			{
+				--yi;
+				++xi;
+			}
+			else
+			{
+				++xi;
+			}
+		}
+		else
+		{
+			// fill diagonals
+			if (x > yi)
+			{
+				pixel_set(argb, argb_width, ox + x - 1, oy + x - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + x - 1, oy - x    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - x    , oy + x - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - x    , oy - x    , color_r, color_g, color_b, 0xFF);
+			}
+
+			// fill the rest of the circle
+			for (i = x + 1; i < y; ++i)
+			{
+				pixel_set(argb, argb_width, ox + x - 1, oy + i - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - x    , oy - i    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + x - 1, oy - i    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - x    , oy + i - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + i - 1, oy + x - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - i    , oy - x    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + i - 1, oy - x    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - i    , oy + x - 1, color_r, color_g, color_b, 0xFF);
+			}
+		}
+
+		if (((x + 1) * (x + 1) + (y * y)) > ro2)
+		{
+			--y;
+			++x;
+		}
+		else
+		{
+			++x;
+		}
+	}
+
+	// set antialiased diagonals pixels
+	a = 0xFF - ((0xFF * ri) - ((0xFF * isqrt(((yi * yi) + (xi * xi)) << 16)) >> 8));
+
+	if (a < 0)
+	{
+		a = -a;
+	}
+
+	pixel_set(argb, argb_width, ox + x - 1, oy + y - 1, color_r, color_g, color_b, 0xFF);
+	pixel_set(argb, argb_width, ox - x    , oy + y - 1, color_r, color_g, color_b, 0xFF);
+	pixel_set(argb, argb_width, ox + x - 1, oy - y    , color_r, color_g, color_b, 0xFF);
+	pixel_set(argb, argb_width, ox - x    , oy - y    , color_r, color_g, color_b, 0xFF);
+
+	// set inner/aliased diagonals pixels
+	pixel_set(argb, argb_width, ox + xi - 1, oy + yi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+	pixel_set(argb, argb_width, ox - xi    , oy + yi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+	pixel_set(argb, argb_width, ox + xi - 1, oy - yi    , color_r, color_g, color_b, color_a * a / 0xFF);
+	pixel_set(argb, argb_width, ox - xi    , oy - yi    , color_r, color_g, color_b, color_a * a / 0xFF);
 }
 
 void rzb_helper_render_gradient_radial(
@@ -1228,6 +1447,129 @@ void rzb_helper_render_cropped_rounded_rectangle(
 			buffer
 				+ ((y + (2 * radius) - pos_y - height) * (2 * radius))
 				+ x1 + radius,
+			size_x2
+				* (sizeof (uint32_t)));
+	}
+}
+
+void rzb_helper_render_cropped_bottom_corners(
+	uint32_t* argb,
+	int argb_width,
+	int buffer_x1,
+	int buffer_x2,
+	int buffer_y1,
+	int buffer_y2,
+	int pos_x,
+	int pos_y,
+	int width,
+	int height,
+	int radius,
+	int size,
+	bool tab,
+	uint32_t color,
+	uint32_t background)
+{
+	uint32_t* buffer =
+		malloc((2 * radius + 2)
+			* (2 * radius + 2)
+			* (sizeof (uint32_t)));
+
+	int size_x1 = pos_x + radius - buffer_x1;
+
+	if (size_x1 > (buffer_x2 - pos_x))
+	{
+		size_x1 = buffer_x2 - pos_x;
+	}
+
+	if (size_x1 < 0)
+	{
+		size_x1 = 0;
+	}
+
+	int size_x2 = buffer_x2 + radius - pos_x - width;
+	int x1 = 0;
+
+	if (size_x2 > pos_x + width - buffer_x1)
+	{
+		size_x2 = pos_x + width - buffer_x1;
+		x1 = radius - size_x2;
+	}
+
+	if (size_x2 < 0)
+	{
+		size_x2 = 0;
+	}
+
+	for (int y = pos_y + height - radius; y < buffer_y2; ++y)
+	{
+		memcpy(
+			buffer
+				+ ((y + (2 * radius) - pos_y - height + 1) * (2 * radius + 2))
+				+ buffer_x1 - pos_x + 1,
+			argb
+				+ y * argb_width
+				+ buffer_x1,
+			size_x1
+				* (sizeof (uint32_t)));
+
+		memcpy(
+			buffer
+				+ ((y + (2 * radius) - pos_y - height + 1) * (2 * radius + 2))
+				+ x1 + radius + 1,
+			argb
+				+ y * argb_width
+				+ pos_x + width - radius + x1,
+			size_x2
+				* (sizeof (uint32_t)));
+	}
+
+	rzb_helper_ring_cross_centered_inverted(
+		buffer,
+		2 * radius + 2,
+		color,
+		radius + 1,
+		radius + 1,
+		radius,
+		radius - size);
+
+	rzb_helper_circle_inverted(
+		buffer,
+		2 * radius + 2,
+		background,
+		radius + 1,
+		radius + 1,
+		radius);
+
+	int y2;
+
+	if ((pos_y + height - radius) < buffer_y1)
+	{
+		y2 = buffer_y1;
+	}
+	else
+	{
+		y2 = pos_y + height - radius;
+	}
+
+	for (int y = y2; y < buffer_y2; ++y)
+	{
+		memcpy(
+			argb
+				+ y * argb_width
+				+ buffer_x1,
+			buffer
+				+ ((y + (2 * radius) - pos_y - height + 1) * (2 * radius + 2))
+				+ buffer_x1 - pos_x + 1,
+			size_x1
+				* (sizeof (uint32_t)));
+
+		memcpy(
+			argb
+				+ y * argb_width
+				+ pos_x + width - radius + x1,
+			buffer
+				+ ((y + (2 * radius) - pos_y - height + 1) * (2 * radius + 2))
+				+ x1 + radius + 1,
 			size_x2
 				* (sizeof (uint32_t)));
 	}
@@ -2094,6 +2436,180 @@ void rzb_helper_render_rounded_rectangle(
 			radius,
 			tab,
 			color);
+	}
+}
+
+void rzb_helper_render_bottom_corners(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	int radius,
+	int size,
+	bool tab,
+	uint32_t color,
+	uint32_t background)
+{
+	int intersections[24] = {0};
+
+	int intersections_count =
+		rzb_helper_crop_rounded_rectangle(
+			x,
+			y,
+			width,
+			height,
+			radius,
+			cropping,
+			intersections);
+
+	int buffer_x1 = x;
+	int buffer_y1 = y;
+	int buffer_x2 = x + width;
+	int buffer_y2 = y + height;
+
+	if (intersections_count == 0)
+	{
+		if ((x >= cropping->x)
+		&& ((x + width) <= (cropping->x + cropping->width))
+		&& (y >= cropping->y)
+		&& ((y + height) <= (cropping->y + cropping->height)))
+		{
+			rzb_helper_render_cropped_bottom_corners(
+				argb,
+				argb_width,
+				buffer_x1,
+				buffer_x2,
+				buffer_y1,
+				buffer_y2,
+				x,
+				y,
+				width,
+				height,
+				radius,
+				size,
+				tab,
+				color,
+				background);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < intersections_count; i += 2)
+		{
+			if ((x + intersections[i])
+				== cropping->x)
+			{
+				buffer_x1 = cropping->x;
+			}
+			else if ((x + intersections[i])
+				== (cropping->x + cropping->width))
+			{
+				buffer_x2 = cropping->x + cropping->width;
+			}
+
+			if ((y + intersections[i + 1])
+				== cropping->y)
+			{
+				buffer_y1 = cropping->y;
+			}
+			else if ((y + intersections[i + 1])
+				== (cropping->y + cropping->height))
+			{
+				buffer_y2 = cropping->y + cropping->height;
+			}
+		}
+
+		rzb_helper_render_cropped_bottom_corners(
+			argb,
+			argb_width,
+			buffer_x1,
+			buffer_x2,
+			buffer_y1,
+			buffer_y2,
+			x,
+			y,
+			width,
+			height,
+			radius,
+			size,
+			tab,
+			color,
+			background);
+	}
+}
+
+void rzb_helper_render_gradient_solid(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	uint32_t color_top,
+	uint32_t color_bottom)
+{
+	int border_pos_x = x;
+	int border_pos_y = y;
+	int border_width = width;
+	int border_height = height;
+
+	rzb_helper_crop_rectangle(
+		border_pos_x,
+		border_width,
+		cropping->x,
+		cropping->width,
+		&border_pos_x,
+		&border_width);
+
+	rzb_helper_crop_rectangle(
+		border_pos_y,
+		border_height,
+		cropping->y,
+		cropping->height,
+		&border_pos_y,
+		&border_height);
+
+	int grad_denominator = height;
+	int grad_numerator;
+
+	uint8_t r1 = (color_top >> 16) & 0xff;
+	uint8_t g1 = (color_top >> 8) & 0xff;
+	uint8_t b1 = color_top & 0xff;
+
+	uint8_t r2 = (color_bottom >> 16) & 0xff;
+	uint8_t g2 = (color_bottom >> 8) & 0xff;
+	uint8_t b2 = color_bottom & 0xff;
+
+	uint8_t* p;
+
+	for (int y = border_pos_y; y < border_pos_y + border_height; ++y)
+	{
+		for (int x = border_pos_x; x < border_pos_x + border_width; ++x)
+		{
+			grad_numerator = height - (y - border_pos_y) - 1;
+			p = ((uint8_t*) argb) + (y * argb_width + x) * 4;
+
+			p[0] = r_gamma_22(
+				(((int) gamma_22(b1) * grad_numerator)
+				+ ((int) gamma_22(b2) * (grad_denominator - grad_numerator)))
+				/ grad_denominator);
+
+			p[1] = r_gamma_22(
+				(((int) gamma_22(g1) * grad_numerator)
+				+ ((int) gamma_22(g2) * (grad_denominator - grad_numerator)))
+				/ grad_denominator);
+
+			p[2] = r_gamma_22(
+				(((int) gamma_22(r1) * grad_numerator)
+				+ ((int) gamma_22(r2) * (grad_denominator - grad_numerator)))
+				/ grad_denominator);
+
+			p[3] = 0xFF;
+		}
 	}
 }
 

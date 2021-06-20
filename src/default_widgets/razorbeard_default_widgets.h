@@ -97,6 +97,8 @@ struct rzb_default_widgets_context
 	uint32_t color_background_box;
 	// button light reflection
 	uint32_t color_foreground_shine;
+	// button light reflection gradient
+	uint32_t color_foreground_shine_gradient;
 };
 
 bool rzb_default_widgets_init(

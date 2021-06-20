@@ -41,6 +41,14 @@ void rzb_helper_circle_cross_centered(
 	int oy,
 	int r);
 
+void rzb_helper_circle_inverted(
+	uint32_t* argb,
+	int argb_width,
+	uint32_t color,
+	int ox,
+	int oy,
+	int r);
+
 void rzb_helper_ring_pixel_centered(
 	uint32_t* argb,
 	int argb_width,
@@ -51,6 +59,15 @@ void rzb_helper_ring_pixel_centered(
 	int ri);
 
 void rzb_helper_ring_cross_centered(
+	uint32_t* argb,
+	int argb_width,
+	uint32_t color,
+	int ox,
+	int oy,
+	int ro,
+	int ri);
+
+void rzb_helper_ring_cross_centered_inverted(
 	uint32_t* argb,
 	int argb_width,
 	uint32_t color,
@@ -110,6 +127,31 @@ void rzb_helper_render_rounded_rectangle(
 	int radius,
 	bool tab,
 	uint32_t color);
+
+void rzb_helper_render_bottom_corners(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	int radius,
+	int size,
+	bool tab,
+	uint32_t color,
+	uint32_t background);
+
+void rzb_helper_render_gradient_solid(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	uint32_t color_top,
+	uint32_t color_bottom);
 
 void rzb_helper_render_hollow_rectangle(
 	uint32_t* argb,
