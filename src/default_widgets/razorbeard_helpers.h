@@ -116,6 +116,16 @@ void rzb_helper_render_circle(
 	int offset,
 	uint32_t color);
 
+void rzb_helper_render_rectangle(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	uint32_t color);
+
 void rzb_helper_render_rounded_rectangle(
 	uint32_t* argb,
 	int argb_width,

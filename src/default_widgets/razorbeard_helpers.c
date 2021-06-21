@@ -1621,6 +1621,30 @@ void rzb_helper_render_border(
 	}
 }
 
+inline void rzb_helper_render_rectangle(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	uint32_t color)
+{
+	rzb_helper_render_border(
+		argb,
+		argb_width,
+		color,
+		x,
+		y,
+		width,
+		height,
+		cropping->x,
+		cropping->x + cropping->width,
+		cropping->y,
+		cropping->y + cropping->height);
+}
+
 void rzb_helper_render_shadow_right(
 	uint32_t* argb,
 	int argb_width,

@@ -134,7 +134,7 @@ bool rzb_default_widgets_init(
 	context->sizes_density_medium = sizes_density_medium;
 	context->sizes_density_high = sizes_density_high;
 
-	context->color_shadow = 0xcc000000;
+	context->color_shadow = 0x66000000;
 	context->color_edge = 0xff0e0e0e;
 	context->color_selected = 0xff2b527b;
 	context->color_text = 0xffeaeaea;
@@ -1048,7 +1048,71 @@ void rzb_render_widget_dropmenu(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping)
 {
-	// TODO
+	struct rzb_default_widgets_context* context = widget->data_widget;
+
+	int thickness = context->sizes_current->size_shadow;
+
+	rzb_helper_render_shadow_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x - thickness,
+		widget->y - thickness,
+		widget->width + (2 * thickness),
+		widget->height + (2 * thickness),
+		thickness + 1,
+		thickness + 1,
+		context->color_shadow);
+
+	rzb_helper_render_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x + widget->width - context->sizes_current->size_edge_border,
+		widget->y + context->sizes_current->size_edge_border,
+		context->sizes_current->size_edge_border,
+		widget->height - (2 * context->sizes_current->size_edge_border),
+		context->color_edge);
+
+	rzb_helper_render_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x,
+		widget->y,
+		widget->width,
+		context->sizes_current->size_edge_border,
+		context->color_edge);
+
+	rzb_helper_render_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x,
+		widget->y + context->sizes_current->size_edge_border,
+		context->sizes_current->size_edge_border,
+		widget->height - (2 * context->sizes_current->size_edge_border),
+		context->color_edge);
+
+	rzb_helper_render_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x,
+		widget->y + widget->height - context->sizes_current->size_edge_border,
+		widget->width,
+		context->sizes_current->size_edge_border,
+		context->color_edge);
+
+	rzb_helper_render_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x + context->sizes_current->size_edge_border,
+		widget->y + context->sizes_current->size_edge_border,
+		widget->width - (2 * context->sizes_current->size_edge_border),
+		widget->height - (2 * context->sizes_current->size_edge_border),
+		context->color_foreground_shine);
 }
 
 // separator
