@@ -43,6 +43,7 @@ bool rzb_default_widgets_init(
 		.size_tab_separator = 1,
 		.padding_tab_separator = 4,
 		.padding_tab_button = 1,
+		.padding_separator = 2,
 
 		.size_handle = 1,
 		.radius_handle = 2,
@@ -79,6 +80,7 @@ bool rzb_default_widgets_init(
 		.size_tab_separator = 2,
 		.padding_tab_separator = 7,
 		.padding_tab_button = 4,
+		.padding_separator = 4,
 
 		.size_handle = 2,
 		.radius_handle = 2,
@@ -115,6 +117,7 @@ bool rzb_default_widgets_init(
 		.size_tab_separator = 3,
 		.padding_tab_separator = 11,
 		.padding_tab_button = 8,
+		.padding_separator = 8,
 
 		.size_handle = 3,
 		.radius_handle = 3,
@@ -1163,7 +1166,17 @@ void rzb_render_widget_separator(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping)
 {
-	// TODO
+	struct rzb_default_widgets_context* context = widget->data_widget;
+
+	rzb_helper_render_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x + context->sizes_current->padding_separator,
+		widget->y + ((widget->height - context->sizes_current->size_separator) / 2),
+		widget->width - (2 * context->sizes_current->padding_separator),
+		context->sizes_current->size_separator,
+		context->color_foreground);
 }
 
 // text

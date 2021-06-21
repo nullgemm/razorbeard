@@ -43,6 +43,8 @@ struct rzb_default_widgets_sizes
 	int padding_tab_separator;
 	// space between the tab navigation button and the tab bar
 	int padding_tab_button;
+	// padding around the separator
+	int padding_separator;
 
 	// thickness of the handles
 	int size_handle;
