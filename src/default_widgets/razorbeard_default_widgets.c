@@ -1663,7 +1663,85 @@ void rzb_render_widget_numberbox(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping)
 {
-	// TODO
+	struct rzb_widget_numberbox* numberbox = widget->data_widget;
+	struct rzb_default_widgets_context* context = numberbox->context;
+	int buttons_size = (widget->height - (3 * context->sizes_current->size_edge_border)) / 2;
+
+	// outer border
+	rzb_helper_render_hollow_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x,
+		widget->y,
+		widget->width,
+		widget->height,
+		context->sizes_current->radius_edge_border,
+		context->sizes_current->size_edge_border,
+		false,
+		context->color_edge);
+
+	// text input
+	rzb_helper_render_rounded_rectangle_side(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x + context->sizes_current->size_edge_border,
+		widget->y + context->sizes_current->size_edge_border,
+		widget->width - buttons_size - (3 * context->sizes_current->size_edge_border),
+		widget->height - (2 * context->sizes_current->size_edge_border),
+		context->sizes_current->radius_edge_border - context->sizes_current->size_edge_border,
+		true,
+		context->color_background_box);
+
+	// buttons
+	rzb_helper_render_rounded_rectangle_side(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x + widget->width - buttons_size - context->sizes_current->size_edge_border,
+		widget->y + context->sizes_current->size_edge_border,
+		buttons_size,
+		widget->height - (2 * context->sizes_current->size_edge_border),
+		context->sizes_current->radius_edge_border - context->sizes_current->size_edge_border,
+		false,
+		context->color_foreground_shine);
+
+	// text/buttons border
+	rzb_helper_render_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x + widget->width - buttons_size - (2 * context->sizes_current->size_edge_border),
+		widget->y + context->sizes_current->size_edge_border,
+		context->sizes_current->size_edge_border,
+		widget->height - (2 * context->sizes_current->size_edge_border),
+		context->color_edge);
+
+	// buttons border
+	rzb_helper_render_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x + widget->width - buttons_size - context->sizes_current->size_edge_border,
+		widget->y + (widget->height / 2),
+		buttons_size,
+		context->sizes_current->size_edge_border,
+		context->color_edge);
+
+	// arrows
+	rzb_helper_render_arrow_vertical(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->y
+			+ (widget->height - (2 * context->sizes_current->size_edge_border)) / 4,
+		widget->y
+			+ 3 * (widget->height - (2 * context->sizes_current->size_edge_border)) / 4,
+		widget->x
+			+ widget->width - (buttons_size / 2) - context->sizes_current->size_edge_border,
+		context->sizes_current->size_arrow_base,
+		context->color_text);
 }
 
 void rzb_event_widget_numberbox(

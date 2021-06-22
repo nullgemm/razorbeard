@@ -138,6 +138,18 @@ void rzb_helper_render_rounded_rectangle(
 	bool tab,
 	uint32_t color);
 
+void rzb_helper_render_rounded_rectangle_side(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	int radius,
+	bool left,
+	uint32_t color);
+
 void rzb_helper_render_bottom_corners(
 	uint32_t* argb,
 	int argb_width,
@@ -195,6 +207,16 @@ void rzb_helper_render_arrow_horizontal(
 	int x1,
 	int x2,
 	int y,
+	int size,
+	uint32_t color);
+
+void rzb_helper_render_arrow_vertical(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int y1,
+	int y2,
+	int x,
 	int size,
 	uint32_t color);
 

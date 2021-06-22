@@ -1452,6 +1452,218 @@ void rzb_helper_render_cropped_rounded_rectangle(
 	}
 }
 
+void rzb_helper_render_cropped_rounded_rectangle_side(
+	uint32_t* argb,
+	int argb_width,
+	int buffer_x1,
+	int buffer_x2,
+	int buffer_y1,
+	int buffer_y2,
+	int pos_x,
+	int pos_y,
+	int width,
+	int height,
+	int radius,
+	bool left,
+	uint32_t color)
+{
+	uint32_t* buffer =
+		malloc((2 * radius)
+			* (2 * radius)
+			* (sizeof (uint32_t)));
+
+	int size_x1 = pos_x + radius - buffer_x1;
+
+	if (size_x1 > (buffer_x2 - pos_x))
+	{
+		size_x1 = buffer_x2 - pos_x;
+	}
+
+	if (size_x1 < 0)
+	{
+		size_x1 = 0;
+	}
+
+	int size_x2 = buffer_x2 + radius - pos_x - width;
+	int x1 = 0;
+
+	if (size_x2 > pos_x + width - buffer_x1)
+	{
+		size_x2 = pos_x + width - buffer_x1;
+		x1 = radius - size_x2;
+	}
+
+	if (size_x2 < 0)
+	{
+		size_x2 = 0;
+	}
+
+	if (left)
+	{
+		for (int y = buffer_y1; y < pos_y + radius; ++y)
+		{
+			memcpy(
+				buffer
+					+ ((y - pos_y) * (2 * radius))
+					+ buffer_x1 - pos_x,
+				argb
+					+ y * argb_width
+					+ buffer_x1,
+				size_x1
+					* (sizeof (uint32_t)));
+		}
+
+		for (int y = pos_y + height - radius; y < buffer_y2; ++y)
+		{
+			memcpy(
+				buffer
+					+ ((y + (2 * radius) - pos_y - height) * (2 * radius))
+					+ buffer_x1 - pos_x,
+				argb
+					+ y * argb_width
+					+ buffer_x1,
+				size_x1
+					* (sizeof (uint32_t)));
+		}
+	}
+	else
+	{
+		for (int y = buffer_y1; y < pos_y + radius; ++y)
+		{
+			memcpy(
+				buffer
+					+ ((y - pos_y) * (2 * radius))
+					+ x1 + radius,
+				argb
+					+ y * argb_width
+					+ pos_x + width - radius + x1,
+				size_x2
+					* (sizeof (uint32_t)));
+		}
+
+		for (int y = pos_y + height - radius; y < buffer_y2; ++y)
+		{
+			memcpy(
+				buffer
+					+ ((y + (2 * radius) - pos_y - height) * (2 * radius))
+					+ x1 + radius,
+				argb
+					+ y * argb_width
+					+ pos_x + width - radius + x1,
+				size_x2
+					* (sizeof (uint32_t)));
+		}
+	}
+
+	rzb_helper_circle_cross_centered(
+		buffer,
+		2 * radius,
+		color,
+		radius,
+		radius,
+		radius);
+
+	for (int y = buffer_y1; y < buffer_y2; ++y)
+	{
+		for (int x = buffer_x1; x < buffer_x2; ++x)
+		{
+			pixel_set(
+				argb,
+				argb_width,
+				x,
+				y,
+				(color >> 16) & 0xff,
+				(color >> 8) & 0xff,
+				color & 0xff,
+				color >> 24);
+		}
+	}
+
+	int y1;
+
+	if ((pos_y + radius) > buffer_y2)
+	{
+		y1 = buffer_y2;
+	}
+	else
+	{
+		y1 = pos_y + radius;
+	}
+
+	if (left)
+	{
+		for (int y = buffer_y1; y < y1; ++y)
+		{
+			memcpy(
+				argb
+					+ y * argb_width
+					+ buffer_x1,
+				buffer
+					+ ((y - pos_y) * (2 * radius))
+					+ buffer_x1 - pos_x,
+				size_x1
+					* (sizeof (uint32_t)));
+		}
+	}
+	else
+	{
+		for (int y = buffer_y1; y < y1; ++y)
+		{
+			memcpy(
+				argb
+					+ y * argb_width
+					+ pos_x + width - radius + x1,
+				buffer
+					+ ((y - pos_y) * (2 * radius))
+					+ x1 + radius,
+				size_x2
+					* (sizeof (uint32_t)));
+		}
+	}
+
+	int y2;
+
+	if ((pos_y + height - radius) < buffer_y1)
+	{
+		y2 = buffer_y1;
+	}
+	else
+	{
+		y2 = pos_y + height - radius;
+	}
+
+	if (left)
+	{
+		for (int y = y2; y < buffer_y2; ++y)
+		{
+			memcpy(
+				argb
+					+ y * argb_width
+					+ buffer_x1,
+				buffer
+					+ ((y + (2 * radius) - pos_y - height) * (2 * radius))
+					+ buffer_x1 - pos_x,
+				size_x1
+					* (sizeof (uint32_t)));
+		}
+	}
+	else
+	{
+		for (int y = y2; y < buffer_y2; ++y)
+		{
+			memcpy(
+				argb
+					+ y * argb_width
+					+ pos_x + width - radius + x1,
+				buffer
+					+ ((y + (2 * radius) - pos_y - height) * (2 * radius))
+					+ x1 + radius,
+				size_x2
+					* (sizeof (uint32_t)));
+		}
+	}
+}
+
 void rzb_helper_render_cropped_bottom_corners(
 	uint32_t* argb,
 	int argb_width,
@@ -2367,6 +2579,102 @@ void rzb_helper_render_cropped_shadow_rectangle(
 	}
 }
 
+void rzb_helper_render_rounded_rectangle_side(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	int radius,
+	bool left,
+	uint32_t color)
+{
+	int intersections[24] = {0};
+
+	int intersections_count =
+		rzb_helper_crop_rounded_rectangle(
+			x,
+			y,
+			width,
+			height,
+			radius,
+			cropping,
+			intersections);
+
+	int buffer_x1 = x;
+	int buffer_y1 = y;
+	int buffer_x2 = x + width;
+	int buffer_y2 = y + height;
+
+	if (intersections_count == 0)
+	{
+		if ((x >= cropping->x)
+		&& ((x + width) <= (cropping->x + cropping->width))
+		&& (y >= cropping->y)
+		&& ((y + height) <= (cropping->y + cropping->height)))
+		{
+			rzb_helper_render_cropped_rounded_rectangle_side(
+				argb,
+				argb_width,
+				buffer_x1,
+				buffer_x2,
+				buffer_y1,
+				buffer_y2,
+				x,
+				y,
+				width,
+				height,
+				radius,
+				left,
+				color);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < intersections_count; i += 2)
+		{
+			if ((x + intersections[i])
+				== cropping->x)
+			{
+				buffer_x1 = cropping->x;
+			}
+			else if ((x + intersections[i])
+				== (cropping->x + cropping->width))
+			{
+				buffer_x2 = cropping->x + cropping->width;
+			}
+
+			if ((y + intersections[i + 1])
+				== cropping->y)
+			{
+				buffer_y1 = cropping->y;
+			}
+			else if ((y + intersections[i + 1])
+				== (cropping->y + cropping->height))
+			{
+				buffer_y2 = cropping->y + cropping->height;
+			}
+		}
+
+		rzb_helper_render_cropped_rounded_rectangle_side(
+			argb,
+			argb_width,
+			buffer_x1,
+			buffer_x2,
+			buffer_y1,
+			buffer_y2,
+			x,
+			y,
+			width,
+			height,
+			radius,
+			left,
+			color);
+	}
+}
+
 void rzb_helper_render_rounded_rectangle(
 	uint32_t* argb,
 	int argb_width,
@@ -3042,6 +3350,227 @@ void rzb_helper_render_arrow_horizontal(
 			argb + (y + pos_y - half_size - odd) * argb_width + (x2 + crop_x2 + center - 2 * (half_size + odd) - 1),
 			buffer + (pos_y * buffer_size) + crop_x2 + (1 - odd),
 			crop_width2 * (sizeof (uint32_t)));
+	}
+
+	free(buffer);
+}
+
+void rzb_helper_render_arrow_vertical(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int y1,
+	int y2,
+	int x,
+	int size,
+	uint32_t color)
+{
+	uint8_t color_r = (color >> 16) & 0xFF;
+	uint8_t color_g = (color >> 8) & 0xFF;
+	uint8_t color_b = color & 0xFF;
+
+	// buffer info
+	int buffer_size = size + 2;
+	int center = size / 3;
+
+	int half_size = size / 2;
+	int odd = size % 2;
+
+	uint32_t* buffer = malloc(buffer_size * buffer_size * (sizeof (uint32_t)));
+
+	// cropping values
+	int crop_x = 1;
+	int crop_width = size;
+
+	int crop_y1 = 0;
+	int crop_height1 = half_size + (1 + odd);
+
+	int crop_y2 = half_size + 1;
+	int crop_height2 = half_size + (1 + odd);
+
+	rzb_helper_crop_rectangle(
+		crop_y1,
+		crop_height1,
+		cropping->y - y1 + center,
+		cropping->height,
+		&crop_y1,
+		&crop_height1);
+
+	rzb_helper_crop_rectangle(
+		crop_y2,
+		crop_height2,
+		cropping->y - (y2 + center - 2 * (half_size + odd) - 1),
+		cropping->height,
+		&crop_y2,
+		&crop_height2);
+
+	rzb_helper_crop_rectangle(
+		crop_x,
+		crop_width,
+		cropping->x - (x - half_size - odd),
+		cropping->width,
+		&crop_x,
+		&crop_width);
+
+	// copy relevant background sections in temporary buffer
+	for (int pos_y = crop_y1; pos_y < (crop_y1 + crop_height1); ++pos_y)
+	{
+		memcpy(
+			buffer + (pos_y * buffer_size) + crop_x,
+			argb + (y1 + pos_y - center) * argb_width + (x + crop_x - half_size - odd),
+			crop_width * (sizeof (uint32_t)));
+	}
+
+	for (int pos_y = crop_y2; pos_y < (crop_y2 + crop_height2); ++pos_y)
+	{
+		memcpy(
+			buffer + (pos_y * buffer_size) + crop_x,
+			argb + (y2 + pos_y - center) * argb_width + (x + crop_x - half_size - odd),
+			crop_width * (sizeof (uint32_t)));
+	}
+
+	// render arrows
+	for (int pos_y = 0; pos_y < (half_size + (1 - odd)); ++pos_y)
+	{
+		// render all opaque pixels except the middle horizontal line for odd bases
+		for (int pos_x = 0; pos_x < ((2 * pos_y) + odd); ++pos_x)
+		{
+			pixel_set(
+				buffer,
+				buffer_size,
+				half_size - pos_y + pos_x + 1,
+				pos_y + odd,
+				color_r,
+				color_g,
+				color_b,
+				0xFF);
+
+			pixel_set(
+				buffer,
+				buffer_size,
+				half_size - pos_y + pos_x + 1,
+				size - pos_y + (1 - odd),
+				color_r,
+				color_g,
+				color_b,
+				0xFF);
+		}
+
+		// render all the anti-aliasing except that of the tips of odd bases
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size - pos_y,
+			pos_y + odd,
+			color_r,
+			color_g,
+			color_b,
+			0x60);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size + pos_y + (1 + odd),
+			pos_y + odd,
+			color_r,
+			color_g,
+			color_b,
+			0x60);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size - pos_y,
+			size - pos_y + (1 - odd),
+			color_r,
+			color_g,
+			color_b,
+			0x60);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size + pos_y + (1 + odd),
+			size - pos_y + (1 - odd),
+			color_r,
+			color_g,
+			color_b,
+			0x60);
+	}
+
+	if (odd)
+	{
+		// render the middle horizontal line of odd bases
+		for (int pos = 0; pos < size; ++pos)
+		{
+			pixel_set(
+				buffer,
+				buffer_size,
+				pos + 1,
+				half_size + 1,
+				color_r,
+				color_g,
+				color_b,
+				0xFF);
+		}
+
+		// render the tips of odd bases
+		pixel_set(
+			buffer,
+			buffer_size,
+			buffer_size - 1,
+			half_size + 1,
+			color_r,
+			color_g,
+			color_b,
+			0x40);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size + 1,
+			0,
+			color_r,
+			color_g,
+			color_b,
+			0x40);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			0,
+			half_size + 1,
+			color_r,
+			color_g,
+			color_b,
+			0x40);
+
+		pixel_set(
+			buffer,
+			buffer_size,
+			half_size + 1,
+			buffer_size - 1,
+			color_r,
+			color_g,
+			color_b,
+			0x40);
+	}
+
+	// copy temporary buffer back to the main buffer respecting the cropping values
+	for (int pos_y = crop_y1; pos_y < (crop_y1 + crop_height1); ++pos_y)
+	{
+		memcpy(
+			argb + (y1 + pos_y - center + 1) * argb_width + (x + crop_x - half_size - (1 + odd)),
+			buffer + (pos_y * buffer_size) + crop_x,
+			crop_width * (sizeof (uint32_t)));
+	}
+
+	for (int pos_y = crop_y2; pos_y < (crop_y2 + crop_height2); ++pos_y)
+	{
+		memcpy(
+			argb + (y2 + pos_y + center - size) * argb_width + (x + crop_x - half_size - (1 + odd)),
+			buffer + (pos_y * buffer_size) + crop_x,
+			crop_width * (sizeof (uint32_t)));
 	}
 
 	free(buffer);
