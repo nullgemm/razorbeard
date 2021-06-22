@@ -1872,7 +1872,33 @@ void rzb_render_widget_textbox(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping)
 {
-	// TODO
+	struct rzb_widget_textbox* data = widget->data_widget;
+	struct rzb_default_widgets_context* context = data->context;
+
+	rzb_helper_render_hollow_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x,
+		widget->y,
+		widget->width,
+		widget->height,
+		context->sizes_current->radius_edge_border,
+		context->sizes_current->size_edge_border,
+		false,
+		context->color_edge);
+
+	rzb_helper_render_rounded_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x + context->sizes_current->size_edge_border,
+		widget->y + context->sizes_current->size_edge_border,
+		widget->width - (2 * context->sizes_current->size_edge_border),
+		widget->height - (2 * context->sizes_current->size_edge_border),
+		context->sizes_current->radius_edge_border - context->sizes_current->size_edge_border,
+		false,
+		context->color_background_box);
 }
 
 void rzb_event_widget_textbox(
