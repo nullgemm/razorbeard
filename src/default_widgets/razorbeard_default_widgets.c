@@ -2164,7 +2164,43 @@ void rzb_render_widget_radiobutton(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping)
 {
-	// TODO
+	struct rzb_widget_radiobutton* data = widget->data_widget;
+	struct rzb_default_widgets_context* context = data->context;
+
+	int min;
+
+	if (widget->height < widget->width)
+	{
+		min = widget->height;
+	}
+	else
+	{
+		min = widget->width;
+	}
+
+	int center_offset = min % 2;
+	int pos_x = widget->x + widget->width / 2;
+	int pos_y = widget->y + widget->height / 2;
+
+	rzb_helper_render_circle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		pos_x,
+		pos_y,
+		min / 2,
+		center_offset,
+		context->color_edge);
+
+	rzb_helper_render_circle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		pos_x,
+		pos_y,
+		(min / 2) - context->sizes_current->padding_radiobutton,
+		center_offset,
+		context->color_text);
 }
 
 void rzb_event_widget_radiobutton(
