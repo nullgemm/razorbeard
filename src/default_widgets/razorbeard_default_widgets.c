@@ -2742,6 +2742,23 @@ void rzb_render_widget_progressbar(
 		context->sizes_current->radius_edge_border
 		- context->sizes_current->size_edge_border;
 
+	int width;
+	int height;
+	int y;
+
+	if (data->vertical)
+	{
+		width = (widget->width - (4 * context->sizes_current->size_edge_border));
+		height = (2 * size_bar) + (widget->height - (2 * context->sizes_current->radius_edge_border)) * data->progress / 100;
+		y = widget->y + widget->height - height - (2 * context->sizes_current->size_edge_border);
+	}
+	else
+	{
+		height = (widget->height - (4 * context->sizes_current->size_edge_border));
+		width = (2 * size_bar) + (widget->width - (2 * context->sizes_current->radius_edge_border)) * data->progress / 100;
+		y = widget->y + (2 * context->sizes_current->size_edge_border);
+	}
+
 	rzb_helper_render_hollow_rectangle(
 		rzb->argb,
 		rzb->argb_width,
@@ -2775,10 +2792,9 @@ void rzb_render_widget_progressbar(
 		cropping,
 		widget->x
 			+ (2 * context->sizes_current->size_edge_border),
-		widget->y
-			+ (2 * context->sizes_current->size_edge_border),
-		(2 * size_bar) + (widget->width - (2 * context->sizes_current->radius_edge_border)) * data->progress / 100,
-		(widget->height - (4 * context->sizes_current->size_edge_border)),
+		y,
+		width,
+		height,
 		size_bar,
 		false,
 		context->color_selected);
