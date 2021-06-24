@@ -2731,5 +2731,55 @@ void rzb_render_widget_progressbar(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping)
 {
-	// TODO
+	struct rzb_widget_progressbar* data = widget->data_widget;
+	struct rzb_default_widgets_context* context = data->context;
+
+	int size_bar =
+		context->sizes_current->radius_edge_border
+		- (2 * context->sizes_current->size_edge_border);
+
+	int size_inner =
+		context->sizes_current->radius_edge_border
+		- context->sizes_current->size_edge_border;
+
+	rzb_helper_render_hollow_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x,
+		widget->y,
+		widget->width,
+		widget->height,
+		context->sizes_current->radius_edge_border,
+		context->sizes_current->size_edge_border,
+		false,
+		context->color_edge);
+
+	rzb_helper_render_rounded_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x
+			+ context->sizes_current->size_edge_border,
+		widget->y
+			+ context->sizes_current->size_edge_border,
+		(widget->width - (2 * context->sizes_current->size_edge_border)),
+		(widget->height - (2 * context->sizes_current->size_edge_border)),
+		size_inner,
+		false,
+		context->color_foreground);
+
+	rzb_helper_render_rounded_rectangle(
+		rzb->argb,
+		rzb->argb_width,
+		cropping,
+		widget->x
+			+ (2 * context->sizes_current->size_edge_border),
+		widget->y
+			+ (2 * context->sizes_current->size_edge_border),
+		(2 * size_bar) + (widget->width - (2 * context->sizes_current->radius_edge_border)) * data->progress / 100,
+		(widget->height - (4 * context->sizes_current->size_edge_border)),
+		size_bar,
+		false,
+		context->color_selected);
 }
