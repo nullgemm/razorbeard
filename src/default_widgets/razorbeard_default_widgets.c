@@ -2560,16 +2560,142 @@ void rzb_render_widget_slider(
 		context->sizes_current->radius_edge_border
 		- context->sizes_current->size_edge_border;
 
+	int pos_x_edge;
+	int pos_y_edge;
+	int size_width_edge;
+	int size_height_edge;
+	int pos_x_foreground;
+	int pos_y_foreground;
+	int size_width_foreground;
+	int size_height_foreground;
+	int pos_x_bar;
+	int pos_y_bar;
+	int size_width_bar;
+	int size_height_bar;
+	int pos_x_circle;
+	int pos_y_circle;
+	int radius_circle;
+	int offset_circle;
+
+	if (data->vertical)
+	{
+		size_width_edge =
+			2 * context->sizes_current->radius_edge_border;
+		size_height_edge =
+			widget->height;
+
+		pos_x_edge =
+			widget->x
+				+ (widget->width / 2)
+				- context->sizes_current->radius_edge_border;
+		pos_y_edge =
+			widget->y;
+
+		size_width_foreground =
+			2 * size_inner;
+		size_height_foreground =
+			(widget->height - (2 * context->sizes_current->size_edge_border));
+
+		pos_x_foreground =
+			widget->x
+				+ (widget->width / 2)
+				- size_inner;
+		pos_y_foreground =
+			widget->y
+				+ context->sizes_current->size_edge_border;
+
+		size_width_bar =
+			(2 * size_bar);
+		size_height_bar =
+			(2 * size_bar)
+				+ (widget->height - (2 * context->sizes_current->radius_edge_border))
+					* data->progress / 100;
+
+		pos_x_bar =
+			widget->x
+				+ (widget->width / 2)
+				- size_bar;
+		pos_y_bar =
+			widget->y
+				+ widget->height
+				- size_height_bar
+				- (2 * context->sizes_current->size_edge_border);
+
+		radius_circle = widget->width / 2;
+		offset_circle = widget->width % 2;
+
+		pos_x_circle =
+			widget->x
+				+ (widget->width / 2);
+		pos_y_circle =
+			widget->y
+				+ widget->height
+				- context->sizes_current->radius_edge_border
+				- (widget->height - (2 * context->sizes_current->radius_edge_border))
+					* data->progress / 100;
+	}
+	else
+	{
+		pos_x_edge =
+			widget->x;
+		pos_y_edge =
+			widget->y
+				+ (widget->height / 2)
+				- context->sizes_current->radius_edge_border;
+
+		size_width_edge =
+			widget->width;
+		size_height_edge =
+			2 * context->sizes_current->radius_edge_border;
+
+		pos_x_foreground =
+			widget->x
+				+ context->sizes_current->size_edge_border;
+		pos_y_foreground =
+			widget->y
+				+ (widget->height / 2)
+				- size_inner;
+
+		size_width_foreground =
+			(widget->width - (2 * context->sizes_current->size_edge_border));
+		size_height_foreground =
+			2 * size_inner;
+
+		pos_x_bar =
+			widget->x
+				+ (2 * context->sizes_current->size_edge_border);
+		pos_y_bar =
+			widget->y
+				+ (widget->height / 2)
+				- size_bar;
+
+		size_width_bar =
+			(2 * size_bar)
+				+ (widget->width - (2 * context->sizes_current->radius_edge_border))
+					* data->progress / 100;
+		size_height_bar =
+			2 * size_bar;
+
+		pos_x_circle =
+			widget->x
+				+ context->sizes_current->radius_edge_border
+				+ (widget->width - (2 * context->sizes_current->radius_edge_border))
+					* data->progress / 100;
+		pos_y_circle =
+			widget->y
+				+ (widget->height / 2);
+		radius_circle = widget->height / 2;
+		offset_circle = widget->height % 2;
+	}
+
 	rzb_helper_render_hollow_rectangle(
 		rzb->argb,
 		rzb->argb_width,
 		cropping,
-		widget->x,
-		widget->y
-			+ (widget->height / 2)
-			- context->sizes_current->radius_edge_border,
-		widget->width,
-		2 * context->sizes_current->radius_edge_border,
+		pos_x_edge,
+		pos_y_edge,
+		size_width_edge,
+		size_height_edge,
 		context->sizes_current->radius_edge_border,
 		context->sizes_current->size_edge_border,
 		false,
@@ -2579,13 +2705,10 @@ void rzb_render_widget_slider(
 		rzb->argb,
 		rzb->argb_width,
 		cropping,
-		widget->x
-			+ context->sizes_current->size_edge_border,
-		widget->y
-			+ (widget->height / 2)
-			- size_inner,
-		(widget->width - (2 * context->sizes_current->size_edge_border)),
-		2 * size_inner,
+		pos_x_foreground,
+		pos_y_foreground,
+		size_width_foreground,
+		size_height_foreground,
 		context->sizes_current->size_edge_border,
 		false,
 		context->color_foreground);
@@ -2594,15 +2717,10 @@ void rzb_render_widget_slider(
 		rzb->argb,
 		rzb->argb_width,
 		cropping,
-		widget->x
-			+ (2 * context->sizes_current->size_edge_border),
-		widget->y
-			+ (widget->height / 2)
-			- size_bar,
-		(2 * size_bar)
-			+ (widget->width - (2 * context->sizes_current->radius_edge_border))
-				* data->progress / 100,
-		2 * size_bar,
+		pos_x_bar,
+		pos_y_bar,
+		size_width_bar,
+		size_height_bar,
 		context->sizes_current->size_edge_border,
 		false,
 		context->color_selected);
@@ -2611,29 +2729,21 @@ void rzb_render_widget_slider(
 		rzb->argb,
 		rzb->argb_width,
 		cropping,
-		widget->x
-			+ context->sizes_current->radius_edge_border
-			+ (widget->width - (2 * context->sizes_current->radius_edge_border))
-				* data->progress / 100,
-		widget->y
-			+ (widget->height / 2),
-		(widget->height / 2),
-		(widget->height % 2),
+		pos_x_circle,
+		pos_y_circle,
+		radius_circle,
+		offset_circle,
 		context->color_edge);
 
 	rzb_helper_render_circle(
 		rzb->argb,
 		rzb->argb_width,
 		cropping,
-		widget->x
-			+ context->sizes_current->radius_edge_border
-			+ (widget->width - (2 * context->sizes_current->radius_edge_border))
-				* data->progress / 100,
-		widget->y
-			+ (widget->height / 2),
-		(widget->height / 2)
+		pos_x_circle,
+		pos_y_circle,
+		radius_circle
 			- context->sizes_current->size_edge_border,
-		(widget->height % 2),
+		offset_circle,
 		context->color_foreground_shine);
 }
 
