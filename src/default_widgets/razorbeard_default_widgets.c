@@ -1293,9 +1293,9 @@ struct rzb_widget*
 	widget->height = 0;
 
 	widget->callback_layout = callback_layout;
-	widget->callback_render = rzb_render_widget_handles;
+	widget->callback_render = rzb_render_widget_image;
 	widget->callback_events = NULL;
-	widget->callback_free = rzb_free_widget_handles;
+	widget->callback_free = rzb_free_widget_image;
 	widget->data_widget = NULL;
 
 	// widget-specific data
@@ -1372,9 +1372,9 @@ struct rzb_widget*
 	widget->height = 0;
 
 	widget->callback_layout = callback_layout;
-	widget->callback_render = rzb_render_widget_handles;
-	widget->callback_events = rzb_event_widget_handles;
-	widget->callback_free = rzb_free_widget_handles;
+	widget->callback_render = rzb_render_widget_button;
+	widget->callback_events = rzb_event_widget_button;
+	widget->callback_free = rzb_free_widget_button;
 	widget->data_widget = NULL;
 
 	// widget-specific data
@@ -1607,9 +1607,9 @@ struct rzb_widget*
 	widget->height = 0;
 
 	widget->callback_layout = callback_layout;
-	widget->callback_render = rzb_render_widget_handles;
-	widget->callback_events = rzb_event_widget_handles;
-	widget->callback_free = rzb_free_widget_handles;
+	widget->callback_render = rzb_render_widget_numberbox;
+	widget->callback_events = rzb_event_widget_numberbox;
+	widget->callback_free = rzb_free_widget_numberbox;
 	widget->data_widget = NULL;
 
 	// widget-specific data
@@ -1960,9 +1960,9 @@ struct rzb_widget*
 	widget->height = 0;
 
 	widget->callback_layout = callback_layout;
-	widget->callback_render = rzb_render_widget_handles;
-	widget->callback_events = rzb_event_widget_handles;
-	widget->callback_free = rzb_free_widget_handles;
+	widget->callback_render = rzb_render_widget_textarea;
+	widget->callback_events = rzb_event_widget_textarea;
+	widget->callback_free = rzb_free_widget_textarea;
 	widget->data_widget = NULL;
 
 	// widget-specific data
