@@ -15,13 +15,13 @@
 // TODO bundle Noto inside the default widgets library
 //
 // DONE widget init and free functions (final)
-// TODO widget sample render functions (final)
+// DONE widget sample render functions (final)
 //      make it compile in a globox example
 //      write a widget's render function, test in globox, iterate until finished
 //      	(cropping must be supported and all cases test-rendered)
 //      same for the next widget
 //      etc.
-// TODO widget stand-alone example render with globox (only for initial tests)
+// DONE widget stand-alone example render with globox (only for initial tests)
 //
 // TODO razorbeard init/free
 // TODO razorbeard rendering
@@ -29,6 +29,9 @@
 // TODO widget event handling
 // TODO razorbeard complete example with globox + willis + dpishit + cursoryx
 //
+// TODO image widget
+// TODO text rendering
+// TODO scrollbar widget and view
 // TODO widget data getters and setters
 
 // pre-declaration
@@ -85,6 +88,7 @@ struct rzb_widget
 	struct rzb_widget* window_partition_slot;
 	size_t children_count;
 	size_t children_limit;
+	bool hide;
 
 	// layout
 

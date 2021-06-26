@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// gamma-aware color blending with the existing pixel values
+// linear blending does not seem to matter here
 void pixel_set_gradient(
 	uint32_t* argb,
 	int argb_width,
@@ -20,26 +20,14 @@ void pixel_set_gradient(
 	uint8_t a)
 {
 	uint8_t* p = ((uint8_t*) argb) + (y * argb_width + x) * 4;
-	uint8_t a_dst = p[3];
 	uint8_t alpha = (0xFF - (grad_numerator * 0xFF / grad_denominator)) * a / 0xFF;
-	uint8_t a_out = (((int) a_dst) * (0xFF - alpha) / 0xFF) + alpha;
+	uint8_t a_out = (((int) p[3]) * (0xFF - alpha) / 0xFF) + alpha;
 
 	if (a_out > 0)
 	{
-		p[0] = r_gamma_22(
-			(((int) gamma_22(b) * alpha)
-			+ (((int) gamma_22(p[0]) * a_dst * (0xFF - alpha)) / 0xFF))
-			/ a_out);
-
-		p[1] = r_gamma_22(
-			(((int) gamma_22(g) * alpha)
-			+ (((int) gamma_22(p[1]) * a_dst * (0xFF - alpha)) / 0xFF))
-			/ a_out);
-
-		p[2] = r_gamma_22(
-			(((int) gamma_22(r) * alpha)
-			+ (((int) gamma_22(p[2]) * a_dst * (0xFF - alpha)) / 0xFF))
-			/ a_out);
+		p[0] = ((b * alpha) + (p[0] * (0xFF - alpha))) / a_out;
+		p[1] = ((g * alpha) + (p[1] * (0xFF - alpha))) / a_out;
+		p[2] = ((r * alpha) + (p[2] * (0xFF - alpha))) / a_out;
 	}
 
 	p[3] = a_out;
@@ -56,25 +44,13 @@ void pixel_set(
 	uint8_t a)
 {
 	uint8_t* p = ((uint8_t*) argb) + (y * argb_width + x) * 4;
-	uint8_t a_dst = p[3];
-	uint8_t a_out = (((int) a_dst) * (0xFF - a) / 0xFF) + a;
+	uint8_t a_out = (((int) p[3]) * (0xFF - a) / 0xFF) + a;
 
 	if (a_out > 0)
 	{
-		p[0] = r_gamma_22(
-			(((int) gamma_22(b) * a)
-			+ (((int) gamma_22(p[0]) * a_dst * (0xFF - a)) / 0xFF))
-			/ a_out);
-
-		p[1] = r_gamma_22(
-			(((int) gamma_22(g) * a)
-			+ (((int) gamma_22(p[1]) * a_dst * (0xFF - a)) / 0xFF))
-			/ a_out);
-
-		p[2] = r_gamma_22(
-			(((int) gamma_22(r) * a)
-			+ (((int) gamma_22(p[2]) * a_dst * (0xFF - a)) / 0xFF))
-			/ a_out);
+		p[0] = ((b * a) + (p[0] * (0xFF - a))) / a_out;
+		p[1] = ((g * a) + (p[1] * (0xFF - a))) / a_out;
+		p[2] = ((r * a) + (p[2] * (0xFF - a))) / a_out;
 	}
 
 	p[3] = a_out;
@@ -3195,20 +3171,20 @@ void rzb_helper_render_gradient_solid(
 			grad_numerator = height - (y - border_pos_y) - 1;
 			p = ((uint8_t*) argb) + (y * argb_width + x) * 4;
 
-			p[0] = r_gamma_22(
-				(((int) gamma_22(b1) * grad_numerator)
-				+ ((int) gamma_22(b2) * (grad_denominator - grad_numerator)))
-				/ grad_denominator);
+			p[0] =
+				(((int) b1 * grad_numerator)
+				+ ((int) b2 * (grad_denominator - grad_numerator)))
+				/ grad_denominator;
 
-			p[1] = r_gamma_22(
-				(((int) gamma_22(g1) * grad_numerator)
-				+ ((int) gamma_22(g2) * (grad_denominator - grad_numerator)))
-				/ grad_denominator);
+			p[1] =
+				(((int) g1 * grad_numerator)
+				+ ((int) g2 * (grad_denominator - grad_numerator)))
+				/ grad_denominator;
 
-			p[2] = r_gamma_22(
-				(((int) gamma_22(r1) * grad_numerator)
-				+ ((int) gamma_22(r2) * (grad_denominator - grad_numerator)))
-				/ grad_denominator);
+			p[2] =
+				(((int) r1 * grad_numerator)
+				+ ((int) r2 * (grad_denominator - grad_numerator)))
+				/ grad_denominator;
 
 			p[3] = 0xFF;
 		}

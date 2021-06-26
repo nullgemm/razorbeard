@@ -188,6 +188,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = sections_count;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -252,18 +253,6 @@ void rzb_render_widget_handles(
 {
 	struct rzb_widget_handles* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
-
-	// fill the widget's background
-
-	for (int y = cropping->y; y < cropping->y + cropping->height; ++y)
-	{
-		for (int x = cropping->x; x < cropping->x + cropping->width; ++x)
-		{
-			rzb->argb[(y * rzb->argb_width) + x] = context->color_background;
-		}
-	}
-
-	// render handles
 
 	int handle_pos = 0;
 	int handle_pos_min = 0;
@@ -441,7 +430,7 @@ void rzb_render_widget_handles(
 
 		// render handle dots
 		radius = context->sizes_current->radius_handle;
-		circle_y = handle_pos;
+		circle_y = handle_pos + widget_thickness_pos;
 
 		for (int i = 0; i < 4; ++i)
 		{
@@ -524,6 +513,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 1;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -624,6 +614,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 1;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -706,6 +697,14 @@ void rzb_render_widget_tabs(
 		cropping->height,
 		&pos_y,
 		&height);
+
+	for (int y = widget->y; y < context->sizes_current->tab_default_height; ++y)
+	{
+		for (int x = pos_x; x < pos_x + width; ++x)
+		{
+			rzb->argb[(y * rzb->argb_width) + x] = context->color_foreground_shine;
+		}
+	}
 
 	for (int y = pos_y; y < (pos_y + height); ++y)
 	{
@@ -934,6 +933,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 1;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -1024,6 +1024,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 1;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -1139,6 +1140,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -1201,6 +1203,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -1286,6 +1289,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -1365,6 +1369,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -1433,7 +1438,8 @@ void rzb_render_widget_button(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping)
 {
-	struct rzb_default_widgets_context* context = widget->data_widget;
+	struct rzb_widget_button* data = widget->data_widget;
+	struct rzb_default_widgets_context* context = data->context;
 
 	// render bottom infill with gradient
 	rzb_helper_render_gradient_solid(
@@ -1600,6 +1606,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -1809,6 +1816,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -1953,6 +1961,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -2114,6 +2123,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -2247,6 +2257,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -2381,6 +2392,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -2497,6 +2509,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
@@ -2791,6 +2804,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->hide = false;
 
 	widget->x = 0;
 	widget->y = 0;
