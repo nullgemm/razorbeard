@@ -188,6 +188,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = sections_count;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -513,6 +514,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 1;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -614,6 +616,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 1;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -933,6 +936,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 1;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -1024,6 +1028,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 1;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -1140,6 +1145,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -1203,6 +1209,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -1289,6 +1296,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -1369,6 +1377,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -1606,6 +1615,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -1816,6 +1826,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -1961,6 +1972,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -2123,6 +2135,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -2257,6 +2270,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -2392,6 +2406,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -2509,6 +2524,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;
@@ -2804,6 +2820,7 @@ struct rzb_widget*
 	widget->window_partition_slot = NULL;
 	widget->children_count = 0;
 	widget->children_limit = 0;
+	widget->render = true;
 	widget->hide = false;
 
 	widget->x = 0;

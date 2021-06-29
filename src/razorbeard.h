@@ -54,9 +54,6 @@ struct rzb
 	struct rzb_widget* root_widget;
 	struct rzb_widget* events_grabber;
 
-	struct rzb_widget** render_list;
-	size_t render_list_size;
-
 	struct rzb_widget*** window_partition;
 	size_t window_partition_width;
 	size_t window_partition_height;
@@ -88,6 +85,7 @@ struct rzb_widget
 	struct rzb_widget* window_partition_slot;
 	size_t children_count;
 	size_t children_limit;
+	bool render;
 	bool hide;
 
 	// layout
@@ -150,7 +148,10 @@ void rzb_grab_events(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-void rzb_render(
+bool rzb_render(
+	struct rzb* rzb);
+
+void rzb_render_all(
 	struct rzb* rzb);
 
 
@@ -174,13 +175,11 @@ bool rzb_make_detached(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
 
-
-bool rzb_renderlist_add(
-	struct rzb* rzb,
-	struct rzb_widget* widget);
-
-bool rzb_layout_update(
-	struct rzb* rzb,
-	struct rzb_widget* widget);
+void rzb_widget_layout_update(
+	struct rzb_widget* widget,
+	int x,
+	int y,
+	int width,
+	int height);
 
 #endif
