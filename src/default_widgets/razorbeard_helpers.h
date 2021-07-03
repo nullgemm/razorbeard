@@ -76,6 +76,15 @@ void rzb_helper_ring_cross_centered_inverted(
 	int ro,
 	int ri);
 
+void rzb_helper_ring_cross_centered_full(
+	uint32_t* argb,
+	int argb_width,
+	uint32_t color,
+	int ox,
+	int oy,
+	int ro,
+	int ri);
+
 void rzb_helper_render_gradient_radial(
 	uint32_t* argb,
 	int argb_width,
@@ -196,6 +205,7 @@ void rzb_helper_render_hollow_rectangle(
 	int radius,
 	int thickness,
 	bool tab,
+	bool full,
 	uint32_t color);
 
 void rzb_helper_render_shadow_rectangle(

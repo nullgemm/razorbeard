@@ -882,6 +882,163 @@ void rzb_helper_ring_cross_centered_inverted(
 	pixel_set(argb, argb_width, ox - xi    , oy - yi    , color_r, color_g, color_b, color_a * a / 0xFF);
 }
 
+void rzb_helper_ring_cross_centered_full(
+	uint32_t* argb,
+	int argb_width,
+	uint32_t color,
+	int ox,
+	int oy,
+	int ro,
+	int ri)
+{
+	int color_a = color >> 24;
+	int color_r = (color >> 16) & 0xFF;
+	int color_g = (color >> 8) & 0xFF;
+	int color_b = color & 0xFF;
+
+	ro += 1;
+	ri += 1;
+
+	int32_t i;
+	int32_t a;
+
+	int32_t x = 1;
+	int32_t y = ro - 1;
+
+	int32_t xi = 1;
+	int32_t yi = ri - 1;
+
+	int32_t ro2 = ro * ro;
+	int32_t ri2 = ri * ri;
+
+	while (x < y)
+	{
+		a = (0xFF * ro) - ((0xFF * isqrt(((y * y) + (x * x)) << 16)) >> 8);
+
+		if (a < 0)
+		{
+			a = -a;
+		}
+
+		// set antialiased NNE, NNW, SSE, SSW octants
+		pixel_set(argb, argb_width, ox + x - 1, oy + y - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox - x    , oy + y - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox + x - 1, oy - y    , color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox - x    , oy - y    , color_r, color_g, color_b, color_a * a / 0xFF);
+
+		// set antialiased ENE, ESE, WNW, WSW octants
+		pixel_set(argb, argb_width, ox + y - 1, oy + x - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox - y    , oy + x - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox + y - 1, oy - x    , color_r, color_g, color_b, color_a * a / 0xFF);
+		pixel_set(argb, argb_width, ox - y    , oy - x    , color_r, color_g, color_b, color_a * a / 0xFF);
+
+		a = 0xFF - ((0xFF * ri) - ((0xFF * isqrt(((yi * yi) + (xi * xi)) << 16)) >> 8));
+
+		if (a < 0)
+		{
+			a = -a;
+		}
+
+		if (xi < yi)
+		{
+			// set antialiased NNE, NNW, SSE, SSW octants
+			pixel_set(argb, argb_width, ox + xi - 1, oy + yi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox - xi    , oy + yi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox + xi - 1, oy - yi    , color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox - xi    , oy - yi    , color_r, color_g, color_b, color_a * a / 0xFF);
+
+			// set antialiased ENE, ESE, WNW, WSW octants
+			pixel_set(argb, argb_width, ox + yi - 1, oy + xi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox - yi    , oy + xi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox + yi - 1, oy - xi    , color_r, color_g, color_b, color_a * a / 0xFF);
+			pixel_set(argb, argb_width, ox - yi    , oy - xi    , color_r, color_g, color_b, color_a * a / 0xFF);
+
+			// fill the rest of the circle
+			for (i = yi + 1; i < y; ++i)
+			{
+				pixel_set(argb, argb_width, ox + xi - 1, oy + i - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - xi    , oy - i    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + xi - 1, oy - i    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - xi    , oy + i - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + i - 1, oy + xi - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - i    , oy - xi    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + i - 1, oy - xi    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - i    , oy + xi - 1, color_r, color_g, color_b, 0xFF);
+			}
+
+			if (((xi + 1) * (xi + 1) + (yi * yi)) > ri2)
+			{
+				--yi;
+				++xi;
+			}
+			else
+			{
+				++xi;
+			}
+		}
+		else
+		{
+			// fill diagonals
+			if (x > yi)
+			{
+				pixel_set(argb, argb_width, ox + x - 1, oy + x - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + x - 1, oy - x    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - x    , oy + x - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - x    , oy - x    , color_r, color_g, color_b, 0xFF);
+			}
+
+			// fill the rest of the circle
+			for (i = x + 1; i < y; ++i)
+			{
+				pixel_set(argb, argb_width, ox + x - 1, oy + i - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - x    , oy - i    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + x - 1, oy - i    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - x    , oy + i - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + i - 1, oy + x - 1, color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - i    , oy - x    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox + i - 1, oy - x    , color_r, color_g, color_b, 0xFF);
+				pixel_set(argb, argb_width, ox - i    , oy + x - 1, color_r, color_g, color_b, 0xFF);
+			}
+		}
+
+		if (((x + 1) * (x + 1) + (y * y)) > ro2)
+		{
+			--y;
+			++x;
+		}
+		else
+		{
+			++x;
+		}
+	}
+
+	// set antialiased diagonals pixels
+	a = (0xFF * ro) - ((0xFF * isqrt(((y * y) + (x * x)) << 16)) >> 8);
+
+	if (a < 0)
+	{
+		a = -a;
+	}
+
+	pixel_set(argb, argb_width, ox + x - 1, oy + y - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+	pixel_set(argb, argb_width, ox - x    , oy + y - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+	pixel_set(argb, argb_width, ox + x - 1, oy - y    , color_r, color_g, color_b, color_a * a / 0xFF);
+	pixel_set(argb, argb_width, ox - x    , oy - y    , color_r, color_g, color_b, color_a * a / 0xFF);
+
+	// set inner/aliased diagonals pixels
+	a = 0xFF - ((0xFF * ri) - ((0xFF * isqrt(((yi * yi) + (xi * xi)) << 16)) >> 8));
+
+	if (a < 0)
+	{
+		a = -a;
+	}
+
+	pixel_set(argb, argb_width, ox + xi - 1, oy + yi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+	pixel_set(argb, argb_width, ox - xi    , oy + yi - 1, color_r, color_g, color_b, color_a * a / 0xFF);
+	pixel_set(argb, argb_width, ox + xi - 1, oy - yi    , color_r, color_g, color_b, color_a * a / 0xFF);
+	pixel_set(argb, argb_width, ox - xi    , oy - yi    , color_r, color_g, color_b, color_a * a / 0xFF);
+}
+
 void rzb_helper_render_gradient_radial(
 	uint32_t* argb,
 	int argb_width,
@@ -2321,6 +2478,7 @@ void rzb_helper_render_cropped_hollow_rectangle(
 	int radius,
 	int thickness,
 	bool tab,
+	bool full,
 	uint32_t color)
 {
 	uint32_t* buffer =
@@ -2400,14 +2558,28 @@ void rzb_helper_render_cropped_hollow_rectangle(
 				* (sizeof (uint32_t)));
 	}
 
-	rzb_helper_ring_cross_centered(
-		buffer,
-		2 * radius,
-		color,
-		radius,
-		radius,
-		radius,
-		radius - thickness);
+	if (full)
+	{
+		rzb_helper_ring_cross_centered_full(
+			buffer,
+			2 * radius,
+			color,
+			radius,
+			radius,
+			radius,
+			radius - thickness);
+	}
+	else
+	{
+		rzb_helper_ring_cross_centered(
+			buffer,
+			2 * radius,
+			color,
+			radius,
+			radius,
+			radius,
+			radius - thickness);
+	}
 
 	// up/down/left/right flat borders
 	int border_pos_x;
@@ -3202,6 +3374,7 @@ void rzb_helper_render_hollow_rectangle(
 	int radius,
 	int thickness,
 	bool tab,
+	bool full,
 	uint32_t color)
 {
 	int intersections[24] = {0};
@@ -3242,6 +3415,7 @@ void rzb_helper_render_hollow_rectangle(
 				radius,
 				thickness,
 				tab,
+				full,
 				color);
 		}
 	}
@@ -3286,6 +3460,7 @@ void rzb_helper_render_hollow_rectangle(
 			radius,
 			thickness,
 			tab,
+			full,
 			color);
 	}
 }

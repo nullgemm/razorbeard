@@ -5,6 +5,41 @@
 #include <stdbool.h>
 #include "razorbeard.h"
 
+enum rzb_default_widgets_event_state
+{
+	RZB_STATE_NONE = 0,
+	RZB_STATE_PRESS,
+	RZB_STATE_RELEASE,
+};
+
+enum rzb_default_widgets_events
+{
+	RZB_NONE = 0,
+
+	RZB_MOUSE_CLICK_LEFT,
+	RZB_MOUSE_CLICK_RIGHT,
+	RZB_MOUSE_CLICK_MIDDLE,
+	RZB_MOUSE_WHEEL_UP,
+	RZB_MOUSE_WHEEL_DOWN,
+	RZB_MOUSE_MOTION,
+
+	RZB_KEY_ESCAPE,
+	RZB_KEY_BACKSPACE,
+	RZB_KEY_TAB,
+	RZB_KEY_ENTER,
+	RZB_KEY_SHIFT,
+	RZB_KEY_CTRL,
+	RZB_KEY_DELETE,
+	RZB_KEY_HOME,
+	RZB_KEY_END,
+	RZB_KEY_PAGE_UP,
+	RZB_KEY_PAGE_DOWN,
+	RZB_KEY_UP,
+	RZB_KEY_DOWN,
+	RZB_KEY_LEFT,
+	RZB_KEY_RIGHT,
+};
+
 struct rzb_default_widgets_sizes
 {
 	// widget shadow thickness
@@ -86,6 +121,8 @@ struct rzb_default_widgets_context
 	uint32_t color_shadow;
 	// widget border
 	uint32_t color_edge;
+	// accent color
+	uint32_t color_accent;
 	// selection border
 	uint32_t color_selected;
 	// all text color
@@ -130,9 +167,10 @@ void rzb_render_widget_handles(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_handles(
+bool rzb_event_widget_handles(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_handles_move_start(
 	struct rzb* rzb,
@@ -170,9 +208,10 @@ void rzb_render_widget_pager(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_pager(
+bool rzb_event_widget_pager(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_pager_scroll_up(
 	struct rzb* rzb,
@@ -212,9 +251,10 @@ void rzb_render_widget_tabs(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_tabs(
+bool rzb_event_widget_tabs(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_tabs_click(
 	struct rzb* rzb,
@@ -363,9 +403,10 @@ void rzb_render_widget_button(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_button(
+bool rzb_event_widget_button(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_button_click(
 	struct rzb* rzb,
@@ -408,9 +449,10 @@ void rzb_render_widget_numberbox(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_numberbox(
+bool rzb_event_widget_numberbox(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_numberbox_select_start(
 	struct rzb* rzb,
@@ -462,9 +504,10 @@ void rzb_render_widget_textbox(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_textbox(
+bool rzb_event_widget_textbox(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_textbox_select_start(
 	struct rzb* rzb,
@@ -509,9 +552,10 @@ void rzb_render_widget_textarea(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_textarea(
+bool rzb_event_widget_textarea(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_textarea_select_start(
 	struct rzb* rzb,
@@ -565,9 +609,10 @@ void rzb_render_widget_radiobutton(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_radiobutton(
+bool rzb_event_widget_radiobutton(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_radiobutton_click(
 	struct rzb* rzb,
@@ -605,9 +650,10 @@ void rzb_render_widget_checkbox(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_checkbox(
+bool rzb_event_widget_checkbox(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_checkbox_click(
 	struct rzb* rzb,
@@ -644,9 +690,10 @@ void rzb_render_widget_scrollbar(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_scrollbar(
+bool rzb_event_widget_scrollbar(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_scrollbar_move_start(
 	struct rzb* rzb,
@@ -687,9 +734,10 @@ void rzb_render_widget_slider(
 	struct rzb_widget* widget,
 	struct rzb_cropping* cropping);
 
-void rzb_event_widget_slider(
+bool rzb_event_widget_slider(
 	struct rzb* rzb,
-	struct rzb_widget* widget);
+	struct rzb_widget* widget,
+	int event);
 
 void rzb_event_widget_slider_move_start(
 	struct rzb* rzb,
@@ -736,5 +784,12 @@ struct rzb_widget_progressbar
 	bool vertical;
 	uint32_t progress; // 16.16 fixed-point
 };
+
+// tools
+
+void rzb_nearest_widget(
+	struct rzb* rzb,
+	struct rzb_widget* widget,
+	enum rzb_default_widgets_events direction);
 
 #endif

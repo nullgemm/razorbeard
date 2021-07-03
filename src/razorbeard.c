@@ -16,18 +16,13 @@ bool rzb_init(
 	rzb->root_widget = NULL;
 	rzb->events_grabber = NULL;
 
-	// initialized by rendering updates
-	rzb->window_partition = NULL;
-	rzb->window_partition_width = 0;
-	rzb->window_partition_height = 0;
+	// the only thing we actually initialize
+	rzb->display_info = display_info;
 
 	// initialized by the user using setters
 	rzb->argb = NULL;
 	rzb->argb_width = 0;
 	rzb->argb_height = 0;
-
-	// the only thing we actually initialize
-	rzb->display_info = display_info;
 
 	return true;
 }
@@ -37,12 +32,7 @@ bool rzb_free(
 {
 	// TODO free widget hierarchy
 
-	for (uint32_t i = 0; i < rzb->window_partition_width; ++i)
-	{
-		free(rzb->window_partition[i]);
-	}
-
-	free(rzb->window_partition);
+	// TODO always alloc'd ? clarify this...
 	free(rzb->display_info);
 	free(rzb);
 
@@ -53,7 +43,39 @@ void rzb_send_event(
 	struct rzb* rzb,
 	int event_id)
 {
-	// TODO
+	struct rzb_widget* tmp = rzb->root_widget;
+	struct rzb_widget* old;
+
+	do
+	{
+		do
+		{
+			if ((tmp->hide == false) && (tmp->callback_events != NULL))
+			{
+				if (tmp->callback_events(rzb, tmp, event_id) == true)
+				{
+					return;
+				}
+			}
+
+			old = tmp;
+			tmp = tmp->children;
+		}
+		while (tmp != NULL);
+
+		do
+		{
+			if (old == NULL)
+			{
+				return;
+			}
+
+			tmp = old->siblings;
+			old = old->parent;
+		}
+		while (tmp == NULL);
+	}
+	while (true);
 }
 
 void rzb_grab_events(
@@ -104,22 +126,27 @@ bool rzb_render(
 			tmp->callback_layout(rzb, tmp);
 
 			// save the widget that triggered this render stream
-			if ((tmp->render == true) && (tmp->hide == false) && (lim == NULL))
+			if ((tmp->render == true) && (lim == NULL))
 			{
-				lim = tmp;
-				crop.x = lim->x;
-				crop.y = lim->y;
-				crop.width = lim->width;
-				crop.height = lim->height;
+				crop.x = tmp->x;
+				crop.y = tmp->y;
+				crop.width = tmp->width;
+				crop.height = tmp->height;
 
-				for (int i = 0; i < stack_size; ++i)
+				for (int i = 0; i < stack_size - 1; ++i)
 				{
 					stack[i]->callback_render(rzb, stack[i], &crop);
 					stack[i]->render = false;
 				}
+
+				if (tmp->hide == false)
+				{
+					lim = tmp;
+				}
 			}
+
 			// render the current widget if in the rest of the render stream
-			else if ((tmp->hide == false) && (lim != NULL))
+			if ((tmp->hide == false) && (lim != NULL))
 			{
 				tmp->callback_render(rzb, tmp, &crop);
 				tmp->render = false;
@@ -330,6 +357,37 @@ bool rzb_make_detached(
 	widget->parent = NULL;
 
 	return true;
+}
+
+void rzb_select_widget(
+	struct rzb* rzb,
+	struct rzb_widget* widget)
+{
+	if (rzb->events_grabber != NULL)
+	{
+		rzb->events_grabber->render = true;
+	}
+
+	if ((widget != NULL) && (widget->hide == false))
+	{
+		rzb->events_grabber = widget;
+		widget->render = true;
+		return;
+	}
+
+	rzb->events_grabber = NULL;
+}
+
+void rzb_widget_set_hide(
+	struct rzb_widget* widget,
+	bool hide)
+{
+	if (hide != widget->hide)
+	{
+		widget->render = true;
+	}
+
+	widget->hide = hide;
 }
 
 void rzb_widget_layout_update(

@@ -6,13 +6,12 @@
 #include <stdint.h>
 
 // DONE forget about this corner saving idea, for both software and gpu backends...
-// TODO ultra-specialize the opengl backends
+// DONE ultra-specialize the opengl backends
 //      we can't generalize GPU-based UI rendering, so just like the software backend,
 //      this one will also be targetting exclusively classic desktop applications:
 //      its only goal will be to provide an alternative backend for classic apps.
 //      for games and other uses of the GPU-based UI rendering,
 //      the developer is supposed to come up with custom rendering.
-// TODO bundle Noto inside the default widgets library
 //
 // DONE widget init and free functions (final)
 // DONE widget sample render functions (final)
@@ -23,16 +22,26 @@
 //      etc.
 // DONE widget stand-alone example render with globox (only for initial tests)
 //
-// TODO razorbeard init/free
-// TODO razorbeard rendering
-// TODO razorbeard event handling
-// TODO widget event handling
+// DONE razorbeard init/free
+// DONE razorbeard rendering
+// TODO razorbeard event handling and selection (with smart arrow keys as well)
+// 		- smart arrow keys work only for non-container widgets (in the demo kit)
+// 		- smart arrow keys is a function called in widgets event callbacks
+// 		- inputs are redirected to selected widget if any
+// 		- otherwise or if the input was rejected we traverse the whole tree
+// TODO widget event handling (specific stuff: tab switch, button click, scroll...)
 // TODO razorbeard complete example with globox + willis + dpishit + cursoryx
 //
+// TODO smart removal of event grabber (when doing other ops such as detaching a widget...)
 // TODO image widget
-// TODO text rendering
-// TODO scrollbar widget and view
+// TODO text rendering (bundle Noto and raqm in example rendering)
 // TODO widget data getters and setters
+// TODO new lib for complex input methods under linux, windows, macOS
+//
+// TODO popup and dropmenu widgets rendering (invalidate the whole window)
+// TODO scrollbar widget and view
+// TODO unit tests
+// TODO rewrite
 
 // pre-declaration
 struct rzb_widget;
@@ -53,16 +62,11 @@ struct rzb
 {
 	struct rzb_widget* root_widget;
 	struct rzb_widget* events_grabber;
-
-	struct rzb_widget*** window_partition;
-	size_t window_partition_width;
-	size_t window_partition_height;
+	struct rzb_display_info* display_info;
 
 	uint32_t* argb;
 	int argb_width;
 	int argb_height;
-
-	struct rzb_display_info* display_info;
 };
 
 // razorbeard cropping info
@@ -119,9 +123,10 @@ struct rzb_widget
 	// called from a visual hashmap
 	// this way we can find the targetted widget quickly
 	// while allowing easy up/down/left/right navigation
-	void (*callback_events)(
+	bool (*callback_events)(
 		struct rzb*,
-		struct rzb_widget*); // dlsym'd
+		struct rzb_widget*,
+		int); // dlsym'd
 
 	// free callback for widget-specific data
 	void (*callback_free)(
@@ -174,6 +179,14 @@ bool rzb_make_sibling(
 bool rzb_make_detached(
 	struct rzb* rzb,
 	struct rzb_widget* widget);
+
+void rzb_select_widget(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
+
+void rzb_widget_set_hide(
+	struct rzb_widget* widget,
+	bool hide);
 
 void rzb_widget_layout_update(
 	struct rzb_widget* widget,
