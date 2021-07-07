@@ -41,10 +41,23 @@ bool rzb_free(
 
 void rzb_send_event(
 	struct rzb* rzb,
-	int event_id)
+	int event_code,
+	int event_state)
 {
-	struct rzb_widget* tmp = rzb->root_widget;
+	struct rzb_widget* tmp = rzb->events_grabber;
 	struct rzb_widget* old;
+
+	if ((tmp == NULL)
+		&& (tmp->hide == false)
+		&& (tmp->callback_events == NULL))
+	{
+		if (tmp->callback_events(rzb, tmp, event_code, event_state) == true)
+		{
+			return;
+		}
+	}
+
+	tmp = rzb->root_widget;
 
 	do
 	{
@@ -52,7 +65,7 @@ void rzb_send_event(
 		{
 			if ((tmp->hide == false) && (tmp->callback_events != NULL))
 			{
-				if (tmp->callback_events(rzb, tmp, event_id) == true)
+				if (tmp->callback_events(rzb, tmp, event_code, event_state) == true)
 				{
 					return;
 				}

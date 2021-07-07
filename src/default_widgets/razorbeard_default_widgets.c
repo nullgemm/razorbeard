@@ -14,10 +14,8 @@
 
 bool rzb_default_widgets_init(
 	struct rzb_default_widgets_context* context,
-	void** events_data,
-	int* events_table)
+	void** events_data)
 {
-	context->events_table = events_table;
 	context->events_data_typed_string = (char**) events_data;
 	context->events_data_mouse_pos_x = 0;
 	context->events_data_mouse_pos_y = 0;
@@ -476,12 +474,15 @@ void rzb_render_widget_handles(
 bool rzb_event_widget_handles(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_handles* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
 		default:
 		{
@@ -585,12 +586,15 @@ void rzb_render_widget_pager(
 bool rzb_event_widget_pager(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_pager* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
 		default:
 		{
@@ -706,6 +710,8 @@ void rzb_render_widget_tabs(
 	int width = widget->width;
 	int pos_y = widget->y + context->sizes_current->tab_default_height;
 	int height = widget->height - context->sizes_current->tab_default_height;
+	int pos_y_tabs = widget->y;
+	int height_tabs = context->sizes_current->tab_default_height;
 
 	rzb_helper_crop_rectangle(
 		pos_x,
@@ -723,7 +729,15 @@ void rzb_render_widget_tabs(
 		&pos_y,
 		&height);
 
-	for (int y = widget->y; y < context->sizes_current->tab_default_height; ++y)
+	rzb_helper_crop_rectangle(
+		pos_y_tabs,
+		height_tabs,
+		cropping->y,
+		cropping->height,
+		&pos_y_tabs,
+		&height_tabs);
+
+	for (int y = pos_y_tabs; y < (pos_y_tabs + height_tabs); ++y)
 	{
 		for (int x = pos_x; x < pos_x + width; ++x)
 		{
@@ -919,12 +933,15 @@ void rzb_render_widget_tabs(
 bool rzb_event_widget_tabs(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_tabs* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
 		default:
 		{
@@ -1631,31 +1648,28 @@ void rzb_render_widget_button(
 bool rzb_event_widget_button(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_button* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
-		case RZB_MOUSE_CLICK_LEFT:
-		{
-			rzb_select_widget(rzb, widget);
-			return true;
-		}
 		case RZB_KEY_UP:
 		case RZB_KEY_DOWN:
 		case RZB_KEY_LEFT:
 		case RZB_KEY_RIGHT:
 		{
-			if (rzb->events_grabber == widget)
+			if ((event_state == RZB_STATE_PRESS)
+				&& (rzb->events_grabber == widget))
 			{
-				printf("lol\n");
-
 				rzb_nearest_widget(
 					rzb,
 					widget,
-					context->events_table[event]);
+					event_code);
 
 				return true;
 			}
@@ -1851,18 +1865,61 @@ void rzb_render_widget_numberbox(
 			+ widget->width - (buttons_size / 2) - context->sizes_current->size_edge_border,
 		context->sizes_current->size_arrow_base,
 		context->color_text);
+
+	if (rzb->events_grabber == widget)
+	{
+		rzb_helper_render_hollow_rectangle(
+			rzb->argb,
+			rzb->argb_width,
+			cropping,
+			widget->x
+				- 2 * context->sizes_current->size_edge_border,
+			widget->y
+				- 2 * context->sizes_current->size_edge_border,
+			widget->width
+				+ 4 * context->sizes_current->size_edge_border,
+			widget->height
+				+ 4 * context->sizes_current->size_edge_border,
+			context->sizes_current->radius_edge_border
+				+ 2 * context->sizes_current->size_edge_border,
+			context->sizes_current->size_edge_border,
+			false,
+			true,
+			context->color_selected);
+	}
 }
 
 bool rzb_event_widget_numberbox(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_numberbox* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
+		case RZB_KEY_UP:
+		case RZB_KEY_DOWN:
+		case RZB_KEY_LEFT:
+		case RZB_KEY_RIGHT:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+				&& (rzb->events_grabber == widget))
+			{
+				rzb_nearest_widget(
+					rzb,
+					widget,
+					event_code);
+
+				return true;
+			}
+
+			return false;
+		}
 		default:
 		{
 			return false;
@@ -2021,18 +2078,61 @@ void rzb_render_widget_textbox(
 		context->sizes_current->radius_edge_border - context->sizes_current->size_edge_border,
 		false,
 		context->color_background_box);
+
+	if (rzb->events_grabber == widget)
+	{
+		rzb_helper_render_hollow_rectangle(
+			rzb->argb,
+			rzb->argb_width,
+			cropping,
+			widget->x
+				- 2 * context->sizes_current->size_edge_border,
+			widget->y
+				- 2 * context->sizes_current->size_edge_border,
+			widget->width
+				+ 4 * context->sizes_current->size_edge_border,
+			widget->height
+				+ 4 * context->sizes_current->size_edge_border,
+			context->sizes_current->radius_edge_border
+				+ 2 * context->sizes_current->size_edge_border,
+			context->sizes_current->size_edge_border,
+			false,
+			true,
+			context->color_selected);
+	}
 }
 
 bool rzb_event_widget_textbox(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_textbox* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
+		case RZB_KEY_UP:
+		case RZB_KEY_DOWN:
+		case RZB_KEY_LEFT:
+		case RZB_KEY_RIGHT:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+				&& (rzb->events_grabber == widget))
+			{
+				rzb_nearest_widget(
+					rzb,
+					widget,
+					event_code);
+
+				return true;
+			}
+
+			return false;
+		}
 		default:
 		{
 			return false;
@@ -2180,18 +2280,61 @@ void rzb_render_widget_textarea(
 		context->sizes_current->radius_edge_border - context->sizes_current->size_edge_border,
 		false,
 		context->color_background_box);
+
+	if (rzb->events_grabber == widget)
+	{
+		rzb_helper_render_hollow_rectangle(
+			rzb->argb,
+			rzb->argb_width,
+			cropping,
+			widget->x
+				- 2 * context->sizes_current->size_edge_border,
+			widget->y
+				- 2 * context->sizes_current->size_edge_border,
+			widget->width
+				+ 4 * context->sizes_current->size_edge_border,
+			widget->height
+				+ 4 * context->sizes_current->size_edge_border,
+			context->sizes_current->radius_edge_border
+				+ 2 * context->sizes_current->size_edge_border,
+			context->sizes_current->size_edge_border,
+			false,
+			true,
+			context->color_selected);
+	}
 }
 
 bool rzb_event_widget_textarea(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_textarea* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
+		case RZB_KEY_UP:
+		case RZB_KEY_DOWN:
+		case RZB_KEY_LEFT:
+		case RZB_KEY_RIGHT:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+				&& (rzb->events_grabber == widget))
+			{
+				rzb_nearest_widget(
+					rzb,
+					widget,
+					event_code);
+
+				return true;
+			}
+
+			return false;
+		}
 		default:
 		{
 			return false;
@@ -2346,18 +2489,51 @@ void rzb_render_widget_radiobutton(
 		(min / 2) - context->sizes_current->padding_radiobutton,
 		center_offset,
 		context->color_text);
+
+	if (rzb->events_grabber == widget)
+	{
+		rzb_helper_ring_cross_centered_full(
+			rzb->argb,
+			rzb->argb_width,
+			context->color_selected,
+			pos_x,
+			pos_y,
+			(min / 2) + (2 * context->sizes_current->size_edge_border),
+			(min / 2) + context->sizes_current->size_edge_border);
+	}
 }
 
 bool rzb_event_widget_radiobutton(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_radiobutton* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
+		case RZB_KEY_UP:
+		case RZB_KEY_DOWN:
+		case RZB_KEY_LEFT:
+		case RZB_KEY_RIGHT:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+				&& (rzb->events_grabber == widget))
+			{
+				rzb_nearest_widget(
+					rzb,
+					widget,
+					event_code);
+
+				return true;
+			}
+
+			return false;
+		}
 		default:
 		{
 			return false;
@@ -2493,18 +2669,61 @@ void rzb_render_widget_checkbox(
 		min - (2 * context->sizes_current->padding_checkbox),
 		center_offset,
 		context->color_text);
+
+	if (rzb->events_grabber == widget)
+	{
+		rzb_helper_render_hollow_rectangle(
+			rzb->argb,
+			rzb->argb_width,
+			cropping,
+			widget->x
+				- 2 * context->sizes_current->size_edge_border,
+			widget->y
+				- 2 * context->sizes_current->size_edge_border,
+			widget->width
+				+ 4 * context->sizes_current->size_edge_border,
+			widget->height
+				+ 4 * context->sizes_current->size_edge_border,
+			context->sizes_current->radius_edge_border
+				+ 2 * context->sizes_current->size_edge_border,
+			context->sizes_current->size_edge_border,
+			false,
+			true,
+			context->color_selected);
+	}
 }
 
 bool rzb_event_widget_checkbox(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_checkbox* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
+		case RZB_KEY_UP:
+		case RZB_KEY_DOWN:
+		case RZB_KEY_LEFT:
+		case RZB_KEY_RIGHT:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+				&& (rzb->events_grabber == widget))
+			{
+				rzb_nearest_widget(
+					rzb,
+					widget,
+					event_code);
+
+				return true;
+			}
+
+			return false;
+		}
 		default:
 		{
 			return false;
@@ -2619,18 +2838,61 @@ void rzb_render_widget_scrollbar(
 			- context->sizes_current->size_edge_border,
 		false,
 		context->color_foreground_shine);
+
+	if (rzb->events_grabber == widget)
+	{
+		rzb_helper_render_hollow_rectangle(
+			rzb->argb,
+			rzb->argb_width,
+			cropping,
+			widget->x
+				- 2 * context->sizes_current->size_edge_border,
+			widget->y
+				- 2 * context->sizes_current->size_edge_border,
+			widget->width
+				+ 4 * context->sizes_current->size_edge_border,
+			widget->height
+				+ 4 * context->sizes_current->size_edge_border,
+			context->sizes_current->radius_edge_border
+				+ 2 * context->sizes_current->size_edge_border,
+			context->sizes_current->size_edge_border,
+			false,
+			true,
+			context->color_selected);
+	}
 }
 
 bool rzb_event_widget_scrollbar(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_scrollbar* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
+		case RZB_KEY_UP:
+		case RZB_KEY_DOWN:
+		case RZB_KEY_LEFT:
+		case RZB_KEY_RIGHT:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+				&& (rzb->events_grabber == widget))
+			{
+				rzb_nearest_widget(
+					rzb,
+					widget,
+					event_code);
+
+				return true;
+			}
+
+			return false;
+		}
 		default:
 		{
 			return false;
@@ -2907,6 +3169,28 @@ void rzb_render_widget_slider(
 		false,
 		context->color_accent);
 
+	if (rzb->events_grabber == widget)
+	{
+		rzb_helper_render_hollow_rectangle(
+			rzb->argb,
+			rzb->argb_width,
+			cropping,
+			pos_x_edge
+				- 2 * context->sizes_current->size_edge_border,
+			pos_y_edge
+				- 2 * context->sizes_current->size_edge_border,
+			size_width_edge
+				+ 4 * context->sizes_current->size_edge_border,
+			size_height_edge
+				+ 4 * context->sizes_current->size_edge_border,
+			context->sizes_current->radius_edge_border
+				+ 2 * context->sizes_current->size_edge_border,
+			context->sizes_current->size_edge_border,
+			false,
+			true,
+			context->color_selected);
+	}
+
 	rzb_helper_render_circle(
 		rzb->argb,
 		rzb->argb_width,
@@ -2932,13 +3216,34 @@ void rzb_render_widget_slider(
 bool rzb_event_widget_slider(
 	struct rzb* rzb,
 	struct rzb_widget* widget,
-	int event)
+	int event_code,
+	int event_state)
 {
+#if 0
 	struct rzb_widget_slider* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+#endif
 
-	switch (context->events_table[event])
+	switch (event_code)
 	{
+		case RZB_KEY_UP:
+		case RZB_KEY_DOWN:
+		case RZB_KEY_LEFT:
+		case RZB_KEY_RIGHT:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+				&& (rzb->events_grabber == widget))
+			{
+				rzb_nearest_widget(
+					rzb,
+					widget,
+					event_code);
+
+				return true;
+			}
+
+			return false;
+		}
 		default:
 		{
 			return false;
@@ -3166,7 +3471,9 @@ void rzb_nearest_widget(
 		}
 		while (tmp != NULL);
 
-		if (old != widget)
+		if ((old != widget)
+			&& (old->callback_events != NULL)
+			&& (old->children_limit == 0))
 		{
 			switch (direction)
 			{
@@ -3210,7 +3517,7 @@ void rzb_nearest_widget(
 				}
 				case RZB_KEY_LEFT:
 				{
-					if (old->x > ox)
+					if ((old->x + old->width) > ox)
 					{
 						break;
 					}
@@ -3229,7 +3536,7 @@ void rzb_nearest_widget(
 				}
 				case RZB_KEY_RIGHT:
 				{
-					if ((old->x + old->width) < ox)
+					if (old->x < ox)
 					{
 						break;
 					}

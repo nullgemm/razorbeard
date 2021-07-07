@@ -24,7 +24,7 @@
 //
 // DONE razorbeard init/free
 // DONE razorbeard rendering
-// TODO razorbeard event handling and selection (with smart arrow keys as well)
+// DONE razorbeard event handling and selection (with smart arrow keys as well)
 // 		- smart arrow keys work only for non-container widgets (in the demo kit)
 // 		- smart arrow keys is a function called in widgets event callbacks
 // 		- inputs are redirected to selected widget if any
@@ -126,6 +126,7 @@ struct rzb_widget
 	bool (*callback_events)(
 		struct rzb*,
 		struct rzb_widget*,
+		int,
 		int); // dlsym'd
 
 	// free callback for widget-specific data
@@ -147,7 +148,8 @@ bool rzb_free(
 
 void rzb_send_event(
 	struct rzb* rzb,
-	int event_id);
+	int event_code,
+	int event_state);
 
 void rzb_grab_events(
 	struct rzb* rzb,
