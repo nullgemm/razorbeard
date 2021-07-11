@@ -1394,6 +1394,136 @@ void rzb_helper_render_circle(
 	}
 }
 
+void rzb_helper_render_maximized(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	int size_bar,
+	int size_border,
+	uint32_t color)
+{
+	int pos_x =
+		x;
+	int pos_width =
+		width;
+
+	int pos_y =
+		y;
+	int pos_height =
+		size_bar;
+
+	int pos_y_bottom =
+		y
+		+ height
+		- size_border;
+	int height_bottom =
+		size_border;
+
+	int pos_y_sides =
+		y
+		+ size_bar;
+	int height_sides =
+		height
+		- size_bar
+		- size_border;
+
+	int pos_x_right =
+		x
+		+ width
+		- size_border;
+	int width_right =
+		size_border;
+
+	int pos_x_left =
+		x;
+	int width_left =
+		size_border;
+
+	rzb_helper_crop_rectangle(
+		pos_x,
+		pos_width,
+		cropping->x,
+		cropping->width,
+		&pos_x,
+		&pos_width);
+
+	rzb_helper_crop_rectangle(
+		pos_y,
+		pos_height,
+		cropping->y,
+		cropping->height,
+		&pos_y,
+		&pos_height);
+
+	rzb_helper_crop_rectangle(
+		pos_y_bottom,
+		height_bottom,
+		cropping->y,
+		cropping->height,
+		&pos_y_bottom,
+		&height_bottom);
+
+	rzb_helper_crop_rectangle(
+		pos_y_sides,
+		height_sides,
+		cropping->y,
+		cropping->height,
+		&pos_y_sides,
+		&height_sides);
+
+	rzb_helper_crop_rectangle(
+		pos_x_right,
+		width_right,
+		cropping->x,
+		cropping->width,
+		&pos_x_right,
+		&width_right);
+
+	rzb_helper_crop_rectangle(
+		pos_x_left,
+		width_left,
+		cropping->x,
+		cropping->width,
+		&pos_x_left,
+		&width_left);
+
+	for (int y = pos_y; y < (pos_y + pos_height); ++y)
+	{
+		for (int x = pos_x; x < pos_x + pos_width; ++x)
+		{
+			argb[(y * argb_width) + x] = color;
+		}
+	}
+
+	for (int y = pos_y_bottom; y < (pos_y_bottom + height_bottom); ++y)
+	{
+		for (int x = pos_x; x < pos_x + pos_width; ++x)
+		{
+			argb[(y * argb_width) + x] = color;
+		}
+	}
+
+	for (int y = pos_y_sides; y < (pos_y_sides + height_sides); ++y)
+	{
+		for (int x = pos_x_left; x < pos_x_left + width_left; ++x)
+		{
+			argb[(y * argb_width) + x] = color;
+		}
+	}
+
+	for (int y = pos_y_sides; y < (pos_y_sides + height_sides); ++y)
+	{
+		for (int x = pos_x_right; x < pos_x_right + width_right; ++x)
+		{
+			argb[(y * argb_width) + x] = color;
+		}
+	}
+}
+
 void rzb_helper_render_cross(
 	uint32_t* argb,
 	int argb_width,
@@ -1402,12 +1532,12 @@ void rzb_helper_render_cross(
 	int center_y,
 	int size,
 	int offset,
+	int thickness,
 	uint32_t color)
 {
 	int odd = size % 2;
 	int half = size / 2;
 
-	int thickness = 1;
 	int buffer_x = center_x - half + 1;
 	int buffer_width = size;
 	int buffer_y = center_y - half + 1;

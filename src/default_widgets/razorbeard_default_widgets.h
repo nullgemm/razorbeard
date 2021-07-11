@@ -4,7 +4,43 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "razorbeard.h"
-#include "razorbeard_events.h"
+
+enum rzb_default_widgets_event_state
+{
+	RZB_STATE_NONE = 0,
+	RZB_STATE_PRESS,
+	RZB_STATE_RELEASE,
+};
+
+enum rzb_default_widgets_events
+{
+	RZB_NONE = 0,
+
+	RZB_MOUSE_CLICK_LEFT,
+	RZB_MOUSE_CLICK_RIGHT,
+	RZB_MOUSE_CLICK_MIDDLE,
+	RZB_MOUSE_WHEEL_UP,
+	RZB_MOUSE_WHEEL_DOWN,
+	RZB_MOUSE_MOTION,
+
+	RZB_KEY_ESCAPE,
+	RZB_KEY_BACKSPACE,
+	RZB_KEY_TAB,
+	RZB_KEY_ENTER,
+	RZB_KEY_SHIFT_LEFT,
+	RZB_KEY_SHIFT_RIGHT,
+	RZB_KEY_CTRL_LEFT,
+	RZB_KEY_CTRL_RIGHT,
+	RZB_KEY_DELETE,
+	RZB_KEY_HOME,
+	RZB_KEY_END,
+	RZB_KEY_PAGE_UP,
+	RZB_KEY_PAGE_DOWN,
+	RZB_KEY_UP,
+	RZB_KEY_DOWN,
+	RZB_KEY_LEFT,
+	RZB_KEY_RIGHT,
+};
 
 struct rzb_default_widgets_sizes
 {
@@ -58,6 +94,13 @@ struct rzb_default_widgets_sizes
 	int tab_default_width;
 	int tab_default_height;
 
+	// default size of the window frame bar
+	int frame_default_height;
+	// default size of the window frame borders
+	int frame_border_size;
+	// default width of the window frame buttons
+	int frame_button_size;
+
 	// padding between the edge border and the content for some widgets
 	int padding_bar;
 	int padding_textbox;
@@ -65,13 +108,18 @@ struct rzb_default_widgets_sizes
 	int padding_radiobutton;
 };
 
+struct rzb_default_widgets_events_data
+{
+	int mouse_pos_x;
+	int mouse_pos_y;
+	char* typed_string;
+};
+
 struct rzb_default_widgets_context
 {
 	// events
 
-	char** events_data_typed_string;
-	int events_data_mouse_pos_x;
-	int events_data_mouse_pos_y;
+	struct rzb_default_widgets_events_data events_data;
 
 	// sizes
 
@@ -84,6 +132,8 @@ struct rzb_default_widgets_context
 
 	// widget shadow
 	uint32_t color_shadow;
+	// window frame
+	uint32_t color_frame;
 	// widget border
 	uint32_t color_edge;
 	// accent color
@@ -106,11 +156,87 @@ struct rzb_default_widgets_context
 };
 
 bool rzb_default_widgets_init(
-	struct rzb_default_widgets_context* context,
-	void** events_data);
+	struct rzb* rzb,
+	struct rzb_default_widgets_context* context);
 
 bool rzb_default_widgets_free(
 	struct rzb_default_widgets_context* context);
+
+// frame
+
+enum rzb_widget_frame_status
+{
+	RZB_WIDGET_FRAME_IDLE = 0,
+
+	RZB_WIDGET_FRAME_MOVE,
+	RZB_WIDGET_FRAME_SIZE_E,
+	RZB_WIDGET_FRAME_SIZE_NE,
+	RZB_WIDGET_FRAME_SIZE_N,
+	RZB_WIDGET_FRAME_SIZE_NW,
+	RZB_WIDGET_FRAME_SIZE_W,
+	RZB_WIDGET_FRAME_SIZE_SW,
+	RZB_WIDGET_FRAME_SIZE_S,
+	RZB_WIDGET_FRAME_SIZE_SE,
+
+	RZB_WIDGET_FRAME_HOVER_CLOSE,
+	RZB_WIDGET_FRAME_HOVER_MAX,
+	RZB_WIDGET_FRAME_HOVER_MIN,
+
+	RZB_WIDGET_FRAME_PRESS_CLOSE,
+	RZB_WIDGET_FRAME_PRESS_MAX,
+	RZB_WIDGET_FRAME_PRESS_MIN,
+};
+
+struct rzb_widget*
+	rzb_alloc_widget_frame(
+		struct rzb* rzb,
+		void (*callback_layout)(struct rzb*, struct rzb_widget*),
+		struct rzb_default_widgets_context* context,
+		char* title,
+		void (*callback_interactive)(void*, enum rzb_widget_frame_status),
+		void* callback_data);
+
+void rzb_free_widget_frame(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
+
+void rzb_render_widget_frame(
+	struct rzb* rzb,
+	struct rzb_widget* widget,
+	struct rzb_cropping* cropping);
+
+bool rzb_event_widget_frame(
+	struct rzb* rzb,
+	struct rzb_widget* widget,
+	int event_code,
+	int event_state);
+
+void rzb_event_widget_frame_size_move(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
+
+void rzb_event_widget_frame_close(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
+
+void rzb_event_widget_frame_maximize(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
+
+void rzb_event_widget_frame_minimize(
+	struct rzb* rzb,
+	struct rzb_widget* widget);
+
+struct rzb_widget_frame
+{
+	struct rzb_default_widgets_context* context;
+
+	char* title;
+	void (*callback_interactive)(void*, enum rzb_widget_frame_status);
+	void* callback_data;
+
+	enum rzb_widget_frame_status status;
+};
 
 // handles
 

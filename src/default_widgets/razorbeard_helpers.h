@@ -125,6 +125,18 @@ void rzb_helper_render_circle(
 	int offset,
 	uint32_t color);
 
+void rzb_helper_render_maximized(
+	uint32_t* argb,
+	int argb_width,
+	struct rzb_cropping* cropping,
+	int x,
+	int y,
+	int width,
+	int height,
+	int size_bar,
+	int size_border,
+	uint32_t color);
+
 void rzb_helper_render_cross(
 	uint32_t* argb,
 	int argb_width,
@@ -133,6 +145,7 @@ void rzb_helper_render_cross(
 	int center_y,
 	int size,
 	int offset,
+	int thickness,
 	uint32_t color);
 
 void rzb_helper_render_rectangle(

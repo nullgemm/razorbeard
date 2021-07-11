@@ -64,6 +64,9 @@ struct rzb
 	struct rzb_widget* events_grabber;
 	struct rzb_display_info* display_info;
 
+	void* callback_send_events_data_context;
+	void (*callback_send_events_data)(void* context, void* data);
+
 	uint32_t* argb;
 	int argb_width;
 	int argb_height;
@@ -86,7 +89,6 @@ struct rzb_widget
 	struct rzb_widget* parent;
 	struct rzb_widget* siblings;
 	struct rzb_widget* children;
-	struct rzb_widget* window_partition_slot;
 	size_t children_count;
 	size_t children_limit;
 	bool render;
@@ -150,6 +152,15 @@ void rzb_send_event(
 	struct rzb* rzb,
 	int event_code,
 	int event_state);
+
+void rzb_send_events_data(
+	struct rzb* rzb,
+	void* data);
+
+void rzb_set_events_data_callback(
+	struct rzb* rzb,
+	void (*callback)(void*, void*),
+	void* context);
 
 void rzb_grab_events(
 	struct rzb* rzb,

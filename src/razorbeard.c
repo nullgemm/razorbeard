@@ -19,6 +19,10 @@ bool rzb_init(
 	// the only thing we actually initialize
 	rzb->display_info = display_info;
 
+	// send events
+	rzb->callback_send_events_data_context = NULL;
+	rzb->callback_send_events_data = NULL;
+
 	// initialized by the user using setters
 	rzb->argb = NULL;
 	rzb->argb_width = 0;
@@ -89,6 +93,24 @@ void rzb_send_event(
 		while (tmp == NULL);
 	}
 	while (true);
+}
+
+void rzb_send_events_data(
+	struct rzb* rzb,
+	void* data)
+{
+	rzb->callback_send_events_data(
+		rzb->callback_send_events_data_context,
+		data);
+}
+
+void rzb_set_events_data_callback(
+	struct rzb* rzb,
+	void (*callback)(void*, void*),
+	void* context)
+{
+	rzb->callback_send_events_data = callback;
+	rzb->callback_send_events_data_context = context;
 }
 
 void rzb_grab_events(
