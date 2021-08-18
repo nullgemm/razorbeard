@@ -33,6 +33,7 @@
 // TODO razorbeard complete example with globox + willis + dpishit + cursoryx
 //
 // TODO smart removal of event grabber (when doing other ops such as detaching a widget...)
+// TODO fix smart arrow keys selection out-of-bounds error
 // TODO image widget
 // TODO text rendering (bundle Noto and raqm in example rendering)
 // TODO widget data getters and setters

@@ -187,6 +187,13 @@ enum rzb_widget_frame_status
 	RZB_WIDGET_FRAME_PRESS_MIN,
 };
 
+enum rzb_widget_frame_action
+{
+	RZB_WIDGET_FRAME_MINIMIZE = 0,
+	RZB_WIDGET_FRAME_MAXIMIZE,
+	RZB_WIDGET_FRAME_CLOSE,
+};
+
 struct rzb_widget*
 	rzb_alloc_widget_frame(
 		struct rzb* rzb,
@@ -194,7 +201,11 @@ struct rzb_widget*
 		struct rzb_default_widgets_context* context,
 		char* title,
 		void (*callback_interactive)(void*, enum rzb_widget_frame_status),
-		void* callback_data);
+		void (*callback_interactive_hover)(void*, enum rzb_widget_frame_status),
+		void (*callback_frame_action)(void*, enum rzb_widget_frame_action),
+		void* callback_data,
+		void* callback_hover_data,
+		void* callback_action_data);
 
 void rzb_free_widget_frame(
 	struct rzb* rzb,
@@ -233,7 +244,11 @@ struct rzb_widget_frame
 
 	char* title;
 	void (*callback_interactive)(void*, enum rzb_widget_frame_status);
+	void (*callback_interactive_hover)(void*, enum rzb_widget_frame_status);
+	void (*callback_frame_action)(void*, enum rzb_widget_frame_action);
 	void* callback_data;
+	void* callback_hover_data;
+	void* callback_action_data;
 
 	enum rzb_widget_frame_status status;
 };

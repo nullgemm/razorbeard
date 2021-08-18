@@ -162,7 +162,11 @@ bool rzb_default_widgets_init(
 	context->sizes_density_high = sizes_density_high;
 
 	context->color_shadow = 0x66000000;
+#if 0
 	context->color_frame = 0xff1b1b1b;
+#else
+	context->color_frame = 0xff1e1e1e;
+#endif
 	context->color_edge = 0xff0e0e0e;
 	context->color_accent= 0xff2b527b;
 	context->color_selected = 0xff1d5289;
@@ -195,7 +199,11 @@ struct rzb_widget*
 		struct rzb_default_widgets_context* context,
 		char* title,
 		void (*callback_interactive)(void*, enum rzb_widget_frame_status),
-		void* callback_data)
+		void (*callback_interactive_hover)(void*, enum rzb_widget_frame_status),
+		void (*callback_frame_action)(void*, enum rzb_widget_frame_action),
+		void* callback_data,
+		void* callback_hover_data,
+		void* callback_action_data)
 {
 	struct rzb_widget* widget = malloc(sizeof (struct rzb_widget));
 
@@ -229,7 +237,11 @@ struct rzb_widget*
 		.context = context,
 		.title = strdup(title),
 		.callback_interactive = callback_interactive,
+		.callback_interactive_hover = callback_interactive_hover,
+		.callback_frame_action = callback_frame_action,
 		.callback_data = callback_data,
+		.callback_hover_data = callback_hover_data,
+		.callback_action_data = callback_action_data,
 		.status = RZB_WIDGET_FRAME_IDLE,
 	};
 
@@ -594,10 +606,6 @@ bool rzb_event_widget_frame(
 	{
 		case RZB_MOUSE_CLICK_LEFT:
 		{
-			int frame_height = context->sizes_current->frame_default_height;
-			int frame_border = context->sizes_current->frame_border_size;
-
-			bool hit;
 			enum rzb_widget_frame_status status;
 
 			// click release
@@ -610,136 +618,28 @@ bool rzb_event_widget_frame(
 				return true;
 			}
 
-			// corners
-			
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y,
-					2 * frame_border,
-					2 * frame_border);
+			// interactive move and resize
 
-			if (hit == true)
+			switch (data->status)
 			{
-				data->status = RZB_WIDGET_FRAME_SIZE_NW;
-				data->callback_interactive(data->callback_data, data->status);
-				widget->render = true;
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x + widget->width - (2 * frame_border),
-					widget->y,
-					2 * frame_border,
-					2 * frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_NE;
-				data->callback_interactive(data->callback_data, data->status);
-				widget->render = true;
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x + widget->width - (2 * frame_border),
-					widget->y + widget->height - (2 * frame_border),
-					2 * frame_border,
-					2 * frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_SE;
-				data->callback_interactive(data->callback_data, data->status);
-				widget->render = true;
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y + widget->height - (2 * frame_border),
-					2 * frame_border,
-					2 * frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_SW;
-				data->callback_interactive(data->callback_data, data->status);
-				widget->render = true;
-				return true;
-			}
-
-			// borders
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y,
-					widget->width,
-					frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_N;
-				data->callback_interactive(data->callback_data, data->status);
-				widget->render = true;
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x + widget->width - frame_border,
-					widget->y + frame_border,
-					frame_border,
-					widget->height - (2 * frame_border));
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_E;
-				data->callback_interactive(data->callback_data, data->status);
-				widget->render = true;
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y + frame_border,
-					frame_border,
-					widget->height - (2 * frame_border));
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_W;
-				data->callback_interactive(data->callback_data, data->status);
-				widget->render = true;
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y + widget->height - frame_border,
-					widget->width,
-					frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_S;
-				data->callback_interactive(data->callback_data, data->status);
-				widget->render = true;
-				return true;
+				case RZB_WIDGET_FRAME_SIZE_E:
+				case RZB_WIDGET_FRAME_SIZE_NE:
+				case RZB_WIDGET_FRAME_SIZE_N:
+				case RZB_WIDGET_FRAME_SIZE_NW:
+				case RZB_WIDGET_FRAME_SIZE_W:
+				case RZB_WIDGET_FRAME_SIZE_SW:
+				case RZB_WIDGET_FRAME_SIZE_S:
+				case RZB_WIDGET_FRAME_SIZE_SE:
+				case RZB_WIDGET_FRAME_MOVE:
+				{
+					data->callback_interactive(data->callback_data, data->status);
+					widget->render = true;
+					return true;
+				}
+				default:
+				{
+					break;
+				}
 			}
 
 			// buttons
@@ -749,16 +649,19 @@ bool rzb_event_widget_frame(
 				case RZB_WIDGET_FRAME_HOVER_CLOSE:
 				{
 					status = RZB_WIDGET_FRAME_PRESS_CLOSE;
+					data->callback_frame_action(data->callback_action_data, RZB_WIDGET_FRAME_CLOSE);
 					break;
 				}
 				case RZB_WIDGET_FRAME_HOVER_MAX:
 				{
 					status = RZB_WIDGET_FRAME_PRESS_MAX;
+					data->callback_frame_action(data->callback_action_data, RZB_WIDGET_FRAME_MAXIMIZE);
 					break;
 				}
 				case RZB_WIDGET_FRAME_HOVER_MIN:
 				{
 					status = RZB_WIDGET_FRAME_PRESS_MIN;
+					data->callback_frame_action(data->callback_action_data, RZB_WIDGET_FRAME_MINIMIZE);
 					break;
 				}
 				default:
@@ -775,7 +678,78 @@ bool rzb_event_widget_frame(
 				return true;
 			}
 
-			// move
+			return false;
+		}
+		case RZB_MOUSE_MOTION:
+		{
+			int frame_height = context->sizes_current->frame_default_height;
+			int frame_border = context->sizes_current->frame_border_size;
+			int frame_button = context->sizes_current->frame_button_size;
+			bool hit;
+
+			// corners
+			
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y,
+					2 * frame_border,
+					2 * frame_border);
+
+			if (hit == true)
+			{
+				data->status = RZB_WIDGET_FRAME_SIZE_NW;
+				data->callback_interactive_hover(data->callback_hover_data, data->status);
+				return true;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + widget->width - (2 * frame_border),
+					widget->y,
+					2 * frame_border,
+					2 * frame_border);
+
+			if (hit == true)
+			{
+				data->status = RZB_WIDGET_FRAME_SIZE_NE;
+				data->callback_interactive_hover(data->callback_hover_data, data->status);
+				return true;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + widget->width - (2 * frame_border),
+					widget->y + widget->height - (2 * frame_border),
+					2 * frame_border,
+					2 * frame_border);
+
+			if (hit == true)
+			{
+				data->status = RZB_WIDGET_FRAME_SIZE_SE;
+				data->callback_interactive_hover(data->callback_hover_data, data->status);
+				return true;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y + widget->height - (2 * frame_border),
+					2 * frame_border,
+					2 * frame_border);
+
+			if (hit == true)
+			{
+				data->status = RZB_WIDGET_FRAME_SIZE_SW;
+				data->callback_interactive_hover(data->callback_hover_data, data->status);
+				return true;
+			}
+
+			// borders
 
 			hit =
 				rzb_helper_event_mouse_in_rect(
@@ -783,43 +757,59 @@ bool rzb_event_widget_frame(
 					widget->x,
 					widget->y,
 					widget->width,
-					frame_height);
+					frame_border);
 
 			if (hit == true)
 			{
-				data->status = RZB_WIDGET_FRAME_MOVE;
-				data->callback_interactive(data->callback_data, data->status);
-				widget->render = true;
+				data->status = RZB_WIDGET_FRAME_SIZE_N;
+				data->callback_interactive_hover(data->callback_hover_data, data->status);
 				return true;
 			}
 
-			return false;
-		}
-		case RZB_MOUSE_MOTION:
-		{
-			switch (data->status)
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + widget->width - frame_border,
+					widget->y + frame_border,
+					frame_border,
+					widget->height - (2 * frame_border));
+
+			if (hit == true)
 			{
-				case RZB_WIDGET_FRAME_SIZE_E:
-				case RZB_WIDGET_FRAME_SIZE_NE:
-				case RZB_WIDGET_FRAME_SIZE_N:
-				case RZB_WIDGET_FRAME_SIZE_NW:
-				case RZB_WIDGET_FRAME_SIZE_W:
-				case RZB_WIDGET_FRAME_SIZE_SW:
-				case RZB_WIDGET_FRAME_SIZE_S:
-				case RZB_WIDGET_FRAME_SIZE_SE:
-				case RZB_WIDGET_FRAME_MOVE:
-				{
-					return true;
-				}
-				default:
-				{
-					break;
-				}
+				data->status = RZB_WIDGET_FRAME_SIZE_E;
+				data->callback_interactive_hover(data->callback_hover_data, data->status);
+				return true;
 			}
 
-			int frame_height = context->sizes_current->frame_default_height;
-			int frame_border = context->sizes_current->frame_border_size;
-			int frame_button = context->sizes_current->frame_button_size;
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y + frame_border,
+					frame_border,
+					widget->height - (2 * frame_border));
+
+			if (hit == true)
+			{
+				data->status = RZB_WIDGET_FRAME_SIZE_W;
+				data->callback_interactive_hover(data->callback_hover_data, data->status);
+				return true;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y + widget->height - frame_border,
+					widget->width,
+					frame_border);
+
+			if (hit == true)
+			{
+				data->status = RZB_WIDGET_FRAME_SIZE_S;
+				data->callback_interactive_hover(data->callback_hover_data, data->status);
+				return true;
+			}
 
 			enum rzb_widget_frame_status status = RZB_WIDGET_FRAME_IDLE;
 			int pos_y_hover = widget->y + frame_border;
@@ -834,7 +824,6 @@ bool rzb_event_widget_frame(
 				RZB_WIDGET_FRAME_HOVER_MIN
 			};
 
-			bool hit;
 			int i = 0;
 
 			while (i < 3)
@@ -858,13 +847,33 @@ bool rzb_event_widget_frame(
 				++i;
 			}
 
-			if  (data->status != status)
+			if (hit == true)
 			{
 				data->status = status;
+				data->callback_interactive_hover(data->callback_hover_data, RZB_WIDGET_FRAME_MOVE);
 				widget->render = true;
 				return true;
 			}
 
+			// move
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y,
+					widget->width,
+					frame_height);
+
+			if (hit == true)
+			{
+				data->status = RZB_WIDGET_FRAME_MOVE;
+				data->callback_interactive_hover(data->callback_hover_data, data->status);
+				return true;
+			}
+
+			data->status = RZB_WIDGET_FRAME_IDLE;
+			data->callback_interactive_hover(data->callback_hover_data, data->status);
 			return false;
 		}
 		default:
