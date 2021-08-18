@@ -253,4 +253,64 @@ void rzb_helper_render_arrow_vertical(
 	int size,
 	uint32_t color);
 
+// button fsm
+
+enum rzb_fsm_button_state
+{
+	RZB_FSM_BUTTON_STATE_IDLING = 0,
+	RZB_FSM_BUTTON_STATE_HOVERING,
+	RZB_FSM_BUTTON_STATE_DRAGGING,
+	RZB_FSM_BUTTON_STATE_COUNT,
+};
+
+struct rzb_fsm_button
+{
+	void* data;
+	enum rzb_fsm_button_state state;
+	enum rzb_fsm_button_state (*update[RZB_FSM_BUTTON_STATE_COUNT])(
+		int event,
+		void* data);
+};
+
+void rzb_fsm_button_init(
+	struct rzb_fsm_button* fsm,
+	void* data,
+	enum rzb_fsm_button_state (**update)(
+		int event,
+		void* data));
+
+void rzb_fsm_button_update(
+	struct rzb_fsm_button* fsm,
+	int event);
+
+// text fsm
+
+enum rzb_fsm_text_state
+{
+	RZB_FSM_TEXT_STATE_IDLING = 0,
+	RZB_FSM_TEXT_STATE_EDITING,
+	RZB_FSM_TEXT_STATE_SELECTING,
+	RZB_FSM_TEXT_STATE_COUNT,
+};
+
+struct rzb_fsm_text
+{
+	void* data;
+	enum rzb_fsm_text_state state;
+	enum rzb_fsm_text_state (*update[RZB_FSM_TEXT_STATE_COUNT])(
+		int event,
+		void* data);
+};
+
+void rzb_fsm_text_init(
+	struct rzb_fsm_text* fsm,
+	void* data,
+	enum rzb_fsm_text_state (**update)(
+		int event,
+		void* data));
+
+void rzb_fsm_text_update(
+	struct rzb_fsm_text* fsm,
+	int event);
+
 #endif

@@ -4126,3 +4126,53 @@ void rzb_helper_render_arrow_vertical(
 
 	free(buffer);
 }
+
+// button fsm
+
+void rzb_fsm_button_init(
+	struct rzb_fsm_button* fsm,
+	void* data,
+	enum rzb_fsm_button_state (**update)(
+		int event,
+		void* data))
+{
+	fsm->data = data;
+	fsm->state = RZB_FSM_BUTTON_STATE_IDLING;
+	// slow and safe
+	for (size_t i = 0; i < RZB_FSM_BUTTON_STATE_COUNT; ++i)
+	{
+		fsm->update[i] = update[i];
+	}
+}
+
+void rzb_fsm_button_update(
+	struct rzb_fsm_button* fsm,
+	int event)
+{
+	fsm->state = fsm->update[fsm->state](event, fsm->data);
+}
+
+// text fsm
+
+void rzb_fsm_text_init(
+	struct rzb_fsm_text* fsm,
+	void* data,
+	enum rzb_fsm_text_state (**update)(
+		int event,
+		void* data))
+{
+	fsm->data = data;
+	fsm->state = RZB_FSM_TEXT_STATE_IDLING;
+	// slow and safe
+	for (size_t i = 0; i < RZB_FSM_TEXT_STATE_COUNT; ++i)
+	{
+		fsm->update[i] = update[i];
+	}
+}
+
+void rzb_fsm_text_update(
+	struct rzb_fsm_text* fsm,
+	int event)
+{
+	fsm->state = fsm->update[fsm->state](event, fsm->data);
+}
