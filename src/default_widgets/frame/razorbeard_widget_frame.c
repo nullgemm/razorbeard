@@ -383,39 +383,6 @@ void rzb_render_widget_frame(
 		context->color_text);
 }
 
-bool rzb_helper_event_mouse_in_rect(
-	struct rzb_default_widgets_context* context,
-	int pos_x_minimize,
-	int pos_y_minimize,
-	int width_minimize,
-	int height_minimize)
-{
-	int x = context->events_data.mouse_pos_x;
-	int y = context->events_data.mouse_pos_y;
-
-	if (x < pos_x_minimize)
-	{
-		return false;
-	}
-
-	if (y < pos_y_minimize)
-	{
-		return false;
-	}
-
-	if (x > (pos_x_minimize + width_minimize))
-	{
-		return false;
-	}
-
-	if (y > (pos_y_minimize + height_minimize))
-	{
-		return false;
-	}
-
-	return true;
-}
-
 bool rzb_event_widget_frame(
 	struct rzb* rzb,
 	struct rzb_widget* widget,

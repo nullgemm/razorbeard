@@ -1,6 +1,7 @@
 #ifndef H_RAZORBEARD_HELPERS
 #define H_RAZORBEARD_HELPERS
 
+#include "razorbeard_default_widgets.h"
 #include "razorbeard.h"
 
 #include <stdbool.h>
@@ -252,6 +253,18 @@ void rzb_helper_render_arrow_vertical(
 	int x,
 	int size,
 	uint32_t color);
+
+bool rzb_helper_event_mouse_in_rect(
+	struct rzb_default_widgets_context* context,
+	int pos_x_minimize,
+	int pos_y_minimize,
+	int width_minimize,
+	int height_minimize);
+
+void rzb_helper_transition_callback(
+	void (*callback)(struct rzb*, struct rzb_widget*),
+	struct rzb* rzb,
+	struct rzb_widget* widget);
 
 // button fsm
 

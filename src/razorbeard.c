@@ -51,9 +51,9 @@ void rzb_send_event(
 	struct rzb_widget* tmp = rzb->events_grabber;
 	struct rzb_widget* old;
 
-	if ((tmp == NULL)
+	if ((tmp != NULL)
 		&& (tmp->hide == false)
-		&& (tmp->callback_events == NULL))
+		&& (tmp->callback_events != NULL))
 	{
 		if (tmp->callback_events(rzb, tmp, event_code, event_state) == true)
 		{

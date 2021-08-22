@@ -11,24 +11,53 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <stdio.h>
-
 // fsm update callbacks
 
 bool update_idling(struct rzb* rzb, void* data, int event_code, int event_state)
 {
+	bool handled = false;
 	struct rzb_widget* widget = data;
 	struct rzb_widget_button* button = widget->data_widget;
+	struct rzb_default_widgets_context* context = button->context;
 
 	switch (event_code)
 	{
-		case 0: // enter area
+		case RZB_MOUSE_MOTION:
 		{
-			rzb_fsm_button_set_state(
-				&(button->fsm_button),
-				RZB_FSM_BUTTON_STATE_HOVERING);
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y,
+					widget->width,
+					widget->height);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(button->fsm_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
 
-			return true;
+				rzb_helper_transition_callback(button->button_on_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		case RZB_KEY_ENTER:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+			&& (rzb->events_grabber == widget))
+			{
+				rzb_fsm_button_set_state(
+					&(button->fsm_button),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
+
+				handled = true;
+			}
+
+			break;
 		}
 		case RZB_KEY_UP:
 		case RZB_KEY_DOWN:
@@ -43,72 +72,176 @@ bool update_idling(struct rzb* rzb, void* data, int event_code, int event_state)
 					widget,
 					event_code);
 
-				return true;
+				handled = true;
 			}
 
-			return false;
+			break;
 		}
 		default:
 		{
-			return false;
+			break;
 		}
 	}
 
-	return false;
+	return handled;
 }
 
 bool update_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
 {
-	struct rzb_widget_button* button = data;
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_button* button = widget->data_widget;
+	struct rzb_default_widgets_context* context = button->context;
 
 	switch (event_code)
 	{
-		case 0: // press
+		case RZB_MOUSE_CLICK_LEFT:
 		{
-			rzb_fsm_button_set_state(
-				&(button->fsm_button),
-				RZB_FSM_BUTTON_STATE_DRAGGING);
+			if (event_state == RZB_STATE_PRESS)
+			{
+				rzb_fsm_button_set_state(
+					&(button->fsm_button),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
 
-			return true;
+				rzb_select_widget(
+					rzb,
+					widget);
+
+				rzb_helper_transition_callback(button->button_pressed, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
 		}
-		case 1: // exit area
+		case RZB_MOUSE_MOTION:
 		{
-			rzb_fsm_button_set_state(
-				&(button->fsm_button),
-				RZB_FSM_BUTTON_STATE_IDLING);
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y,
+					widget->width,
+					widget->height);
+			
+			if (hit == false)
+			{
+				rzb_fsm_button_set_state(
+					&(button->fsm_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
 
-			return true;
+				rzb_helper_transition_callback(button->button_off_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		case RZB_KEY_ENTER:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+			&& (rzb->events_grabber == widget))
+			{
+				rzb_fsm_button_set_state(
+					&(button->fsm_button),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
+
+				handled = true;
+			}
+
+			break;
+		}
+		case RZB_KEY_UP:
+		case RZB_KEY_DOWN:
+		case RZB_KEY_LEFT:
+		case RZB_KEY_RIGHT:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+			&& (rzb->events_grabber == widget))
+			{
+				rzb_nearest_widget(
+					rzb,
+					widget,
+					event_code);
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
 		}
 	}
 
-	return false;
+	return handled;
 }
 
 bool update_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
 {
-	struct rzb_widget_button* button = data;
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_button* button = widget->data_widget;
+	struct rzb_default_widgets_context* context = button->context;
 
 	switch (event_code)
 	{
-		case 0: // release out of area
+		case RZB_MOUSE_CLICK_LEFT:
 		{
-			rzb_fsm_button_set_state(
-				&(button->fsm_button),
-				RZB_FSM_BUTTON_STATE_IDLING);
+			if (event_state == RZB_STATE_RELEASE)
+			{
+				bool hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						widget->x,
+						widget->y,
+						widget->width,
+						widget->height);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(button->fsm_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
 
-			return true;
+					rzb_helper_transition_callback(button->button_released_on_area, rzb, widget);
+				}
+				else
+				{
+					rzb_fsm_button_set_state(
+						&(button->fsm_button),
+						RZB_FSM_BUTTON_STATE_IDLING);
+
+					rzb_helper_transition_callback(button->button_released_off_area, rzb, widget);
+				}
+
+				handled = true;
+			}
+
+			break;
 		}
-		case 1: // release on area
+		case RZB_KEY_ENTER:
 		{
-			rzb_fsm_button_set_state(
-				&(button->fsm_button),
-				RZB_FSM_BUTTON_STATE_HOVERING);
+			if ((event_state == RZB_STATE_RELEASE)
+			&& (rzb->events_grabber == widget))
+			{
+				rzb_fsm_button_set_state(
+					&(button->fsm_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
 
-			return true;
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
 		}
 	}
 
-	return false;
+	return handled;
 }
 
 // button

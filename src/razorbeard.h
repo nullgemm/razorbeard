@@ -34,6 +34,7 @@
 //
 // TODO smart removal of event grabber (when doing other ops such as detaching a widget...)
 // TODO fix smart arrow keys selection out-of-bounds error
+// TODO add smart arrow keys selection callback
 // TODO image widget
 // TODO text rendering (bundle Noto and raqm in example rendering)
 // TODO widget data getters and setters
