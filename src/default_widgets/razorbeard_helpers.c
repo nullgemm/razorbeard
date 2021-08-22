@@ -4132,9 +4132,11 @@ void rzb_helper_render_arrow_vertical(
 void rzb_fsm_button_init(
 	struct rzb_fsm_button* fsm,
 	void* data,
-	enum rzb_fsm_button_state (**update)(
-		int event,
-		void* data))
+	bool (**update)(
+		struct rzb* rzb,
+		void* data,
+		int event_code,
+		int event_state))
 {
 	fsm->data = data;
 	fsm->state = RZB_FSM_BUTTON_STATE_IDLING;
@@ -4145,11 +4147,18 @@ void rzb_fsm_button_init(
 	}
 }
 
-void rzb_fsm_button_update(
+bool rzb_fsm_button_update(
+	struct rzb* rzb,
 	struct rzb_fsm_button* fsm,
-	int event)
+	int event_code,
+	int event_state)
 {
-	fsm->state = fsm->update[fsm->state](event, fsm->data);
+	return fsm->update[fsm->state](rzb, fsm->data, event_code, event_state);
+}
+
+void rzb_fsm_button_set_state(struct rzb_fsm_button* fsm, enum rzb_fsm_button_state state)
+{
+	fsm->state = state;
 }
 
 // text fsm
@@ -4157,9 +4166,11 @@ void rzb_fsm_button_update(
 void rzb_fsm_text_init(
 	struct rzb_fsm_text* fsm,
 	void* data,
-	enum rzb_fsm_text_state (**update)(
-		int event,
-		void* data))
+	bool (**update)(
+		struct rzb* rzb,
+		void* data,
+		int event_code,
+		int event_state))
 {
 	fsm->data = data;
 	fsm->state = RZB_FSM_TEXT_STATE_IDLING;
@@ -4170,9 +4181,16 @@ void rzb_fsm_text_init(
 	}
 }
 
-void rzb_fsm_text_update(
+bool rzb_fsm_text_update(
+	struct rzb* rzb,
 	struct rzb_fsm_text* fsm,
-	int event)
+	int event_code,
+	int event_state)
 {
-	fsm->state = fsm->update[fsm->state](event, fsm->data);
+	return fsm->update[fsm->state](rzb, fsm->data, event_code, event_state);
+}
+
+void rzb_fsm_text_set_state(struct rzb_fsm_text* fsm, enum rzb_fsm_text_state state)
+{
+	fsm->state = state;
 }

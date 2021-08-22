@@ -13,6 +13,104 @@
 
 #include <stdio.h>
 
+// fsm update callbacks
+
+bool update_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	struct rzb_widget* widget = data;
+	struct rzb_widget_button* button = widget->data_widget;
+
+	switch (event_code)
+	{
+		case 0: // enter area
+		{
+			rzb_fsm_button_set_state(
+				&(button->fsm_button),
+				RZB_FSM_BUTTON_STATE_HOVERING);
+
+			return true;
+		}
+		case RZB_KEY_UP:
+		case RZB_KEY_DOWN:
+		case RZB_KEY_LEFT:
+		case RZB_KEY_RIGHT:
+		{
+			if ((event_state == RZB_STATE_PRESS)
+			&& (rzb->events_grabber == widget))
+			{
+				rzb_nearest_widget(
+					rzb,
+					widget,
+					event_code);
+
+				return true;
+			}
+
+			return false;
+		}
+		default:
+		{
+			return false;
+		}
+	}
+
+	return false;
+}
+
+bool update_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	struct rzb_widget_button* button = data;
+
+	switch (event_code)
+	{
+		case 0: // press
+		{
+			rzb_fsm_button_set_state(
+				&(button->fsm_button),
+				RZB_FSM_BUTTON_STATE_DRAGGING);
+
+			return true;
+		}
+		case 1: // exit area
+		{
+			rzb_fsm_button_set_state(
+				&(button->fsm_button),
+				RZB_FSM_BUTTON_STATE_IDLING);
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool update_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	struct rzb_widget_button* button = data;
+
+	switch (event_code)
+	{
+		case 0: // release out of area
+		{
+			rzb_fsm_button_set_state(
+				&(button->fsm_button),
+				RZB_FSM_BUTTON_STATE_IDLING);
+
+			return true;
+		}
+		case 1: // release on area
+		{
+			rzb_fsm_button_set_state(
+				&(button->fsm_button),
+				RZB_FSM_BUTTON_STATE_HOVERING);
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
 // button
 
 struct rzb_widget*
@@ -20,9 +118,11 @@ struct rzb_widget*
 		struct rzb* rzb,
 		void (*callback_layout)(struct rzb*, struct rzb_widget*),
 		struct rzb_default_widgets_context* context,
+		void (*button_on_area)(struct rzb*, struct rzb_widget*),
+		void (*button_off_area)(struct rzb*, struct rzb_widget*),
 		void (*button_pressed)(struct rzb*, struct rzb_widget*),
-		void (*button_released)(struct rzb*, struct rzb_widget*),
-		void (*button_activated)(struct rzb*, struct rzb_widget*),
+		void (*button_released_on_area)(struct rzb*, struct rzb_widget*),
+		void (*button_released_off_area)(struct rzb*, struct rzb_widget*),
 		bool toggle,
 		char* text)
 {
@@ -57,9 +157,11 @@ struct rzb_widget*
 	{
 		.context = context,
 
+		.button_on_area = button_on_area,
+		.button_off_area = button_off_area,
 		.button_pressed = button_pressed,
-		.button_released = button_released,
-		.button_activated = button_activated,
+		.button_released_on_area = button_released_on_area,
+		.button_released_off_area = button_released_off_area,
 
 		.pushed = false,
 		.toggle = toggle,
@@ -87,6 +189,19 @@ struct rzb_widget*
 	// naive-copy the data and link it to the widget
 	*data = button;
 	widget->data_widget = data;
+
+	// prepare the fsm
+	bool (*update[RZB_FSM_BUTTON_STATE_COUNT])(struct rzb* rzb, void*, int, int) =
+	{
+		[RZB_FSM_BUTTON_STATE_IDLING] = update_idling,
+		[RZB_FSM_BUTTON_STATE_HOVERING] = update_hovering,
+		[RZB_FSM_BUTTON_STATE_DRAGGING] = update_dragging,
+	};
+
+	rzb_fsm_button_init(
+		&(data->fsm_button),
+		widget,
+		update);
 
 	return widget;
 }
@@ -262,36 +377,9 @@ bool rzb_event_widget_button(
 	int event_code,
 	int event_state)
 {
-#if 0
 	struct rzb_widget_button* data = widget->data_widget;
-	struct rzb_default_widgets_context* context = data->context;
-#endif
 
-	switch (event_code)
-	{
-		case RZB_KEY_UP:
-		case RZB_KEY_DOWN:
-		case RZB_KEY_LEFT:
-		case RZB_KEY_RIGHT:
-		{
-			if ((event_state == RZB_STATE_PRESS)
-				&& (rzb->events_grabber == widget))
-			{
-				rzb_nearest_widget(
-					rzb,
-					widget,
-					event_code);
-
-				return true;
-			}
-
-			return false;
-		}
-		default:
-		{
-			return false;
-		}
-	}
+	return rzb_fsm_button_update(rzb, &(data->fsm_button), event_code, event_state);
 }
 
 void rzb_event_widget_button_click(
