@@ -11,7 +11,579 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <stdio.h>
+// TODO setters: keyboard shortcuts must implemented by the dev for this widget
+
+// fsm updates
+
+bool update_tab_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_tabs* tabs = widget->data_widget;
+	struct rzb_default_widgets_context* context = tabs->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			if (tabs->tabs_total_visible == 0)
+			{
+				break;
+			}
+
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					tabs->tabs_pos_x,
+					tabs->tabs_pos_y,
+					tabs->tabs_size_x * tabs->tabs_total_visible,
+					tabs->tabs_size_y);
+
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_tab_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				int x = context->events_data.mouse_pos_x - tabs->tabs_pos_x;
+				tabs->tabs_hovered = x / tabs->tabs_size_x;
+
+				rzb_helper_transition_callback(tabs->tab_on_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_tab_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_tabs* tabs = widget->data_widget;
+	struct rzb_default_widgets_context* context = tabs->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			if (tabs->tabs_total_visible == 0)
+			{
+				break;
+			}
+
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					tabs->tabs_pos_x,
+					tabs->tabs_pos_y,
+					tabs->tabs_size_x * tabs->tabs_total_visible,
+					tabs->tabs_size_y);
+
+			if (hit == true)
+			{
+				int x = context->events_data.mouse_pos_x - tabs->tabs_pos_x;
+				int id = x / tabs->tabs_size_x;
+
+				if (id != tabs->tabs_hovered)
+				{
+					tabs->tabs_hovered = id;
+					rzb_helper_transition_callback(tabs->tab_on_area, rzb, widget);
+					handled = true;
+				}
+			}
+			else
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_tab_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				rzb_helper_transition_callback(tabs->tab_off_area, rzb, widget);
+			}
+
+			break;
+		}
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (tabs->tabs_total_visible == 0)
+			{
+				break;
+			}
+
+			if (event_state == RZB_STATE_PRESS)
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_tab_button),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
+
+				rzb_select_widget(
+					rzb,
+					widget);
+
+				rzb_helper_transition_callback(tabs->tab_pressed, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_tab_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_tabs* tabs = widget->data_widget;
+	struct rzb_default_widgets_context* context = tabs->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (tabs->tabs_total_visible == 0)
+			{
+				break;
+			}
+
+			if (event_state != RZB_STATE_RELEASE)
+			{
+				break;
+			}
+
+			handled = true;
+
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					tabs->tabs_pos_x,
+					tabs->tabs_pos_y,
+					tabs->tabs_size_x * tabs->tabs_total_visible,
+					tabs->tabs_size_y);
+
+			if (hit == true)
+			{
+				int x = context->events_data.mouse_pos_x - tabs->tabs_pos_x;
+				int id = x / tabs->tabs_size_x;
+
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_tab_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				if (id != tabs->tabs_hovered)
+				{
+					rzb_helper_transition_callback(tabs->tab_released_off_area, rzb, widget);
+
+					tabs->tabs_hovered = id;
+
+					rzb_helper_transition_callback(tabs->tab_on_area, rzb, widget);
+				}
+				else
+				{
+					tabs->tabs_active = tabs->tabs_hovered;
+
+					rzb_helper_transition_callback(tabs->tab_released_on_area, rzb, widget);
+				}
+			}
+			else
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_tab_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				rzb_helper_transition_callback(tabs->tab_released_off_area, rzb, widget);
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_prev_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_tabs* tabs = widget->data_widget;
+	struct rzb_default_widgets_context* context = tabs->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					tabs->nav_prev_pos_x,
+					tabs->nav_prev_pos_y,
+					tabs->nav_size_x,
+					tabs->nav_size_y);
+
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_prev_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				if (tabs->tabs_total_visible == 0)
+				{
+					tabs->tabs_hovered = tabs->tabs_active - 1;
+
+					if (tabs->tabs_hovered < 0)
+					{
+						tabs->tabs_hovered = tabs->tabs_count - 1;
+					}
+
+					rzb_helper_transition_callback(tabs->tab_on_area, rzb, widget);
+				}
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_prev_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_tabs* tabs = widget->data_widget;
+	struct rzb_default_widgets_context* context = tabs->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					tabs->nav_prev_pos_x,
+					tabs->nav_prev_pos_y,
+					tabs->nav_size_x,
+					tabs->nav_size_y);
+
+			if (hit == false)
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_prev_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				rzb_helper_transition_callback(tabs->tab_off_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_PRESS)
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_prev_button),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
+
+				rzb_select_widget(
+					rzb,
+					widget);
+
+				if (tabs->tabs_total_visible == 0)
+				{
+					rzb_helper_transition_callback(tabs->tab_pressed, rzb, widget);
+				}
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_prev_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_tabs* tabs = widget->data_widget;
+	struct rzb_default_widgets_context* context = tabs->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state != RZB_STATE_RELEASE)
+			{
+				break;
+			}
+
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					tabs->nav_prev_pos_x,
+					tabs->nav_prev_pos_y,
+					tabs->nav_size_x,
+					tabs->nav_size_y);
+
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_prev_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				if (tabs->tabs_total_visible == 0)
+				{
+					tabs->tabs_active = tabs->tabs_hovered;
+					tabs->tabs_hovered = tabs->tabs_active - 1;
+
+					if (tabs->tabs_hovered < 0)
+					{
+						tabs->tabs_hovered = tabs->tabs_count - 1;
+					}
+				}
+				else if (tabs->tabs_first_visible > 0)
+				{
+					--tabs->tabs_first_visible;
+				}
+
+				rzb_helper_transition_callback(tabs->tab_released_on_area, rzb, widget);
+			}
+			else
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_prev_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				rzb_helper_transition_callback(tabs->tab_released_off_area, rzb, widget);
+			}
+
+			handled = true;
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_next_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_tabs* tabs = widget->data_widget;
+	struct rzb_default_widgets_context* context = tabs->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					tabs->nav_next_pos_x,
+					tabs->nav_next_pos_y,
+					tabs->nav_size_x,
+					tabs->nav_size_y);
+
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_next_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				if (tabs->tabs_total_visible == 0)
+				{
+					tabs->tabs_hovered = tabs->tabs_active + 1;
+
+					if (tabs->tabs_hovered >= tabs->tabs_count)
+					{
+						tabs->tabs_hovered = 0;
+					}
+
+					rzb_helper_transition_callback(tabs->tab_on_area, rzb, widget);
+				}
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_next_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_tabs* tabs = widget->data_widget;
+	struct rzb_default_widgets_context* context = tabs->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					tabs->nav_next_pos_x,
+					tabs->nav_next_pos_y,
+					tabs->nav_size_x,
+					tabs->nav_size_y);
+
+			if (hit == false)
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_next_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				rzb_helper_transition_callback(tabs->tab_off_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_PRESS)
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_next_button),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
+
+				rzb_select_widget(
+					rzb,
+					widget);
+
+				if (tabs->tabs_total_visible == 0)
+				{
+					rzb_helper_transition_callback(tabs->tab_pressed, rzb, widget);
+				}
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_next_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_tabs* tabs = widget->data_widget;
+	struct rzb_default_widgets_context* context = tabs->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state != RZB_STATE_RELEASE)
+			{
+				break;
+			}
+
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					tabs->nav_next_pos_x,
+					tabs->nav_next_pos_y,
+					tabs->nav_size_x,
+					tabs->nav_size_y);
+
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_next_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				if (tabs->tabs_total_visible == 0)
+				{
+					tabs->tabs_active = tabs->tabs_hovered;
+					tabs->tabs_hovered = tabs->tabs_active + 1;
+
+					if (tabs->tabs_hovered >= tabs->tabs_count)
+					{
+						tabs->tabs_hovered = 0;
+					}
+				}
+				else if ((tabs->tabs_count - tabs->tabs_first_visible) > tabs->tabs_total_visible)
+				{
+					++tabs->tabs_first_visible;
+				}
+
+				rzb_helper_transition_callback(tabs->tab_released_on_area, rzb, widget);
+			}
+			else
+			{
+				rzb_fsm_button_set_state(
+					&(tabs->fsm_next_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				rzb_helper_transition_callback(tabs->tab_released_off_area, rzb, widget);
+			}
+
+			handled = true;
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
 
 // tabs
 
@@ -20,7 +592,11 @@ struct rzb_widget*
 		struct rzb* rzb,
 		void (*callback_layout)(struct rzb*, struct rzb_widget*),
 		struct rzb_default_widgets_context* context,
-		void (*tab_switched)(struct rzb*, struct rzb_widget*),
+		void (*tab_on_area)(struct rzb*, struct rzb_widget*),
+		void (*tab_off_area)(struct rzb*, struct rzb_widget*),
+		void (*tab_pressed)(struct rzb*, struct rzb_widget*),
+		void (*tab_released_on_area)(struct rzb*, struct rzb_widget*),
+		void (*tab_released_off_area)(struct rzb*, struct rzb_widget*),
 		char** tabs_names,
 		int tabs_count,
 		int tab_active)
@@ -55,11 +631,27 @@ struct rzb_widget*
 	struct rzb_widget_tabs tabs =
 	{
 		.context = context,
-		.tab_switched = tab_switched,
+		.tab_on_area = tab_on_area,
+		.tab_off_area = tab_off_area,
+		.tab_pressed = tab_pressed,
+		.tab_released_on_area = tab_released_on_area,
+		.tab_released_off_area = tab_released_off_area,
 		.tabs_names = tabs_names,
 		.tabs_count = tabs_count,
-		.tab_active = tab_active,
-		.tab_first_visible = 0,
+		.tabs_hovered = 0,
+		.tabs_active = tab_active,
+		.tabs_first_visible = 0,
+		.tabs_total_visible = tabs_count,
+		.tabs_size_x = 0,
+		.tabs_size_y = 0,
+		.tabs_pos_x = 0,
+		.tabs_pos_y = 0,
+		.nav_size_x = 0,
+		.nav_size_y = 0,
+		.nav_prev_pos_x = 0,
+		.nav_prev_pos_y = 0,
+		.nav_next_pos_x = 0,
+		.nav_next_pos_y = 0,
 	};
 
 	// prepare persistent memory area
@@ -75,6 +667,46 @@ struct rzb_widget*
 	// naive-copy the data and link it to the widget
 	*data = tabs;
 	widget->data_widget = data;
+
+	// prepare the fsms
+	bool (*update_tab[RZB_FSM_BUTTON_STATE_COUNT])(
+		struct rzb* rzb, void*, int, int) =
+	{
+		[RZB_FSM_BUTTON_STATE_IDLING] = update_tab_idling,
+		[RZB_FSM_BUTTON_STATE_HOVERING] = update_tab_hovering,
+		[RZB_FSM_BUTTON_STATE_DRAGGING] = update_tab_dragging,
+	};
+
+	bool (*update_prev[RZB_FSM_BUTTON_STATE_COUNT])(
+		struct rzb* rzb, void*, int, int) =
+	{
+		[RZB_FSM_BUTTON_STATE_IDLING] = update_prev_idling,
+		[RZB_FSM_BUTTON_STATE_HOVERING] = update_prev_hovering,
+		[RZB_FSM_BUTTON_STATE_DRAGGING] = update_prev_dragging,
+	};
+
+	bool (*update_next[RZB_FSM_BUTTON_STATE_COUNT])(
+		struct rzb* rzb, void*, int, int) =
+	{
+		[RZB_FSM_BUTTON_STATE_IDLING] = update_next_idling,
+		[RZB_FSM_BUTTON_STATE_HOVERING] = update_next_hovering,
+		[RZB_FSM_BUTTON_STATE_DRAGGING] = update_next_dragging,
+	};
+
+	rzb_fsm_button_init(
+		&(data->fsm_tab_button),
+		widget,
+		update_tab);
+
+	rzb_fsm_button_init(
+		&(data->fsm_prev_button),
+		widget,
+		update_prev);
+
+	rzb_fsm_button_init(
+		&(data->fsm_next_button),
+		widget,
+		update_next);
 
 	return widget;
 }
@@ -94,6 +726,18 @@ void rzb_render_widget_tabs(
 {
 	struct rzb_widget_tabs* data = widget->data_widget;
 	struct rzb_default_widgets_context* context = data->context;
+
+	data->tabs_total_visible = 0;
+	data->tabs_size_x = 0;
+	data->tabs_size_y = 0;
+	data->tabs_pos_x = 0;
+	data->tabs_pos_y = 0;
+	data->nav_size_x = 0;
+	data->nav_size_y = 0;
+	data->nav_prev_pos_x = 0;
+	data->nav_prev_pos_y = 0;
+	data->nav_next_pos_x = 0;
+	data->nav_next_pos_y = 0;
 
 	if ((widget->height <= context->sizes_current->tab_default_height)
 		|| (widget->width < (2 * context->sizes_current->tab_default_height)))
@@ -148,49 +792,75 @@ void rzb_render_widget_tabs(
 		}
 	}
 
-	// get the maximum number of tabs we can display
-	int max_tabs;
-	int pos_tabs;
+	data->tabs_total_visible =
+		widget->width / context->sizes_current->tab_default_width;
 
-	if ((widget->width / context->sizes_current->tab_default_width) < data->tabs_count)
+	data->tabs_size_y =
+		context->sizes_current->tab_default_height;
+
+	data->tabs_pos_y =
+		widget->y;
+
+	// get the maximum number of tabs we can display
+	if (data->tabs_total_visible >= data->tabs_count)
 	{
-		max_tabs =
+		data->tabs_total_visible = data->tabs_count;
+		data->tabs_pos_x = widget->x;
+		data->tabs_first_visible = 0;
+	}
+	else if (data->tabs_total_visible < data->tabs_count)
+	{
+		data->tabs_total_visible =
 			(widget->width - (2 * context->sizes_current->tab_default_height))
 			/ context->sizes_current->tab_default_width;
 
-		pos_tabs =
+		data->tabs_pos_x =
 			widget->x
 			+ context->sizes_current->tab_default_height;
 
-		// render the buttons
-		if (max_tabs == 0)
+		if ((data->tabs_first_visible + data->tabs_total_visible) > data->tabs_count)
 		{
+			data->tabs_first_visible = data->tabs_count - data->tabs_total_visible;
+		}
+
+		// render the buttons
+		if (data->tabs_total_visible == 0)
+		{
+			data->nav_size_x =
+				(widget->width - 3 * context->sizes_current->padding_tab_button) / 2;
+			data->nav_size_y = context->sizes_current->tab_default_height
+				- 2 * context->sizes_current->padding_tab_button;
+
+			data->nav_prev_pos_x = widget->x
+				+ context->sizes_current->padding_tab_button;
+			data->nav_prev_pos_y = widget->y
+				+ context->sizes_current->padding_tab_button;
+
 			rzb_helper_render_rounded_rectangle(
 				rzb->argb,
 				rzb->argb_width,
 				cropping,
-				widget->x
-					+ context->sizes_current->padding_tab_button,
-				widget->y
-					+ context->sizes_current->padding_tab_button,
-				(widget->width - 3 * context->sizes_current->padding_tab_button) / 2,
-				context->sizes_current->tab_default_height
-					- 2 * context->sizes_current->padding_tab_button,
+				data->nav_prev_pos_x,
+				data->nav_prev_pos_y,
+				data->nav_size_x,
+				data->nav_size_y,
 				context->sizes_current->radius_edge_border,
 				false,
 				context->color_background);
 
+			data->nav_next_pos_x = widget->x
+				+ (widget->width + context->sizes_current->padding_tab_button) / 2;
+			data->nav_next_pos_y = widget->y
+				+ context->sizes_current->padding_tab_button;
+
 			rzb_helper_render_rounded_rectangle(
 				rzb->argb,
 				rzb->argb_width,
 				cropping,
-				widget->x
-					+ (widget->width + context->sizes_current->padding_tab_button) / 2,
-				widget->y
-					+ context->sizes_current->padding_tab_button,
-				(widget->width - 3 * context->sizes_current->padding_tab_button) / 2,
-				context->sizes_current->tab_default_height
-					- 2 * context->sizes_current->padding_tab_button,
+				data->nav_next_pos_x,
+				data->nav_next_pos_y,
+				data->nav_size_x,
+				data->nav_size_y,
 				context->sizes_current->radius_edge_border,
 				false,
 				context->color_background);
@@ -208,36 +878,43 @@ void rzb_render_widget_tabs(
 		}
 		else
 		{
-			rzb_helper_render_rounded_rectangle(
-				rzb->argb,
-				rzb->argb_width,
-				cropping,
-				widget->x
-					+ context->sizes_current->padding_tab_button,
-				widget->y
-					+ context->sizes_current->padding_tab_button,
-				context->sizes_current->tab_default_height
-					- 2 * context->sizes_current->padding_tab_button,
-				context->sizes_current->tab_default_height
-					- 2 * context->sizes_current->padding_tab_button,
-				context->sizes_current->radius_edge_border,
-				false,
-				context->color_background);
+			data->nav_size_x = context->sizes_current->tab_default_height
+				- 2 * context->sizes_current->padding_tab_button;
+			data->nav_size_y = context->sizes_current->tab_default_height
+				- 2 * context->sizes_current->padding_tab_button;
+
+			data->nav_prev_pos_x = widget->x
+				+ context->sizes_current->padding_tab_button;
+			data->nav_prev_pos_y = widget->y
+				+ context->sizes_current->padding_tab_button;
 
 			rzb_helper_render_rounded_rectangle(
 				rzb->argb,
 				rzb->argb_width,
 				cropping,
-				widget->x
-					+ widget->width
-					- context->sizes_current->tab_default_height
-					+ context->sizes_current->padding_tab_button,
-				widget->y
-					+ context->sizes_current->padding_tab_button,
-				context->sizes_current->tab_default_height
-					- 2 * context->sizes_current->padding_tab_button,
-				context->sizes_current->tab_default_height
-					- 2 * context->sizes_current->padding_tab_button,
+				data->nav_prev_pos_x,
+				data->nav_prev_pos_y,
+				data->nav_size_x,
+				data->nav_size_y,
+				context->sizes_current->radius_edge_border,
+				false,
+				context->color_background);
+
+			data->nav_next_pos_x = widget->x
+				+ widget->width
+				- context->sizes_current->tab_default_height
+				+ context->sizes_current->padding_tab_button;
+			data->nav_next_pos_y = widget->y
+				+ context->sizes_current->padding_tab_button;
+
+			rzb_helper_render_rounded_rectangle(
+				rzb->argb,
+				rzb->argb_width,
+				cropping,
+				data->nav_next_pos_x,
+				data->nav_next_pos_y,
+				data->nav_size_x,
+				data->nav_size_y,
 				context->sizes_current->radius_edge_border,
 				false,
 				context->color_background);
@@ -257,22 +934,21 @@ void rzb_render_widget_tabs(
 				context->color_text);
 		}
 	}
-	else
-	{
-		max_tabs = data->tabs_count;
-		pos_tabs = widget->x;
-	}
 
-	if (max_tabs > 0)
+	if (data->tabs_total_visible > 0)
 	{
+		data->tabs_size_x = context->sizes_current->tab_default_width;
+
 		// render the active tab background
-		if ((data->tab_active - data->tab_first_visible) < max_tabs)
+		int tabs_active_rank = data->tabs_active - data->tabs_first_visible;
+
+		if ((tabs_active_rank >= 0) && (tabs_active_rank < data->tabs_total_visible))
 		{
 			rzb_helper_render_rounded_rectangle(
 				rzb->argb,
 				rzb->argb_width,
 				cropping,
-				pos_tabs + ((data->tab_active - data->tab_first_visible) * context->sizes_current->tab_default_width),
+				data->tabs_pos_x + (tabs_active_rank * context->sizes_current->tab_default_width),
 				widget->y,
 				context->sizes_current->tab_default_width,
 				context->sizes_current->tab_default_height,
@@ -282,14 +958,14 @@ void rzb_render_widget_tabs(
 		}
 
 		// render the tabs text and separators
-		for (int i = 0; i < max_tabs; ++i)
+		for (int i = 0; i < data->tabs_total_visible; ++i)
 		{
 			// render separators
-			if ((i != (data->tab_active - data->tab_first_visible))
-				&& ((i + 1) != (data->tab_active - data->tab_first_visible))
-				&& ((i + 1) < max_tabs))
+			if ((i != (data->tabs_active - data->tabs_first_visible))
+				&& ((i + 1) != (data->tabs_active - data->tabs_first_visible))
+				&& ((i + 1) < data->tabs_total_visible))
 			{
-				pos_x = pos_tabs + ((i + 1) * context->sizes_current->tab_default_width) - (context->sizes_current->size_tab_separator / 2);
+				pos_x = data->tabs_pos_x + ((i + 1) * context->sizes_current->tab_default_width) - (context->sizes_current->size_tab_separator / 2);
 				width = context->sizes_current->size_tab_separator;
 				pos_y = widget->y + context->sizes_current->padding_tab_separator;
 				height = context->sizes_current->tab_default_height - (2 * context->sizes_current->padding_tab_separator);
@@ -331,18 +1007,88 @@ bool rzb_event_widget_tabs(
 	int event_code,
 	int event_state)
 {
-#if 0
 	struct rzb_widget_tabs* data = widget->data_widget;
-	struct rzb_default_widgets_context* context = data->context;
-#endif
 
-	switch (event_code)
+	// if there is a fsm is not idling, only try its handler
+
+	enum rzb_fsm_button_state state;
+
+	state = rzb_fsm_button_get_state(&(data->fsm_tab_button));
+
+	if (state != RZB_FSM_BUTTON_STATE_IDLING)
 	{
-		default:
-		{
-			return false;
-		}
+		return rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_tab_button),
+			event_code,
+			event_state);
 	}
+
+	state = rzb_fsm_button_get_state(&(data->fsm_next_button));
+
+	if (state != RZB_FSM_BUTTON_STATE_IDLING)
+	{
+		return rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_next_button),
+			event_code,
+			event_state);
+	}
+
+	state = rzb_fsm_button_get_state(&(data->fsm_prev_button));
+
+	if (state != RZB_FSM_BUTTON_STATE_IDLING)
+	{
+		return rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_prev_button),
+			event_code,
+			event_state);
+	}
+
+	// otherwise try all fsm handlers
+
+	bool handled;
+
+	handled =
+		rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_tab_button),
+			event_code,
+			event_state);
+
+	if (handled == true)
+	{
+		return handled;
+	}
+
+	handled =
+		rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_next_button),
+			event_code,
+			event_state);
+
+	if (handled == true)
+	{
+		return handled;
+	}
+
+	handled =
+		rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_prev_button),
+			event_code,
+			event_state);
+
+	if (handled == true)
+	{
+		return handled;
+	}
+
+	// return false if no fsm handler accepted the event
+
+	return handled;
 }
 
 void rzb_event_widget_tabs_click(

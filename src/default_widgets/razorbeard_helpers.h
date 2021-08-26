@@ -306,6 +306,9 @@ void rzb_fsm_button_set_state(
 	struct rzb_fsm_button* fsm,
 	enum rzb_fsm_button_state state);
 
+enum rzb_fsm_button_state rzb_fsm_button_get_state(
+	struct rzb_fsm_button* fsm);
+
 // text fsm
 
 enum rzb_fsm_text_state
