@@ -21,18 +21,7 @@ enum rzb_widget_frame_status
 	RZB_WIDGET_FRAME_SIZE_S,
 	RZB_WIDGET_FRAME_SIZE_SE,
 
-	RZB_WIDGET_FRAME_HOVER_CLOSE,
-	RZB_WIDGET_FRAME_HOVER_MAX,
-	RZB_WIDGET_FRAME_HOVER_MIN,
-
-	RZB_WIDGET_FRAME_PRESS_CLOSE,
-	RZB_WIDGET_FRAME_PRESS_MAX,
-	RZB_WIDGET_FRAME_PRESS_MIN,
-};
-
-enum rzb_widget_frame_action
-{
-	RZB_WIDGET_FRAME_MINIMIZE = 0,
+	RZB_WIDGET_FRAME_MINIMIZE,
 	RZB_WIDGET_FRAME_MAXIMIZE,
 	RZB_WIDGET_FRAME_CLOSE,
 };
@@ -43,12 +32,12 @@ struct rzb_widget*
 		void (*callback_layout)(struct rzb*, struct rzb_widget*),
 		struct rzb_default_widgets_context* context,
 		char* title,
-		void (*callback_interactive)(void*, enum rzb_widget_frame_status),
-		void (*callback_interactive_hover)(void*, enum rzb_widget_frame_status),
-		void (*callback_frame_action)(void*, enum rzb_widget_frame_action),
-		void* callback_data,
-		void* callback_hover_data,
-		void* callback_action_data);
+		void (*button_on_area)(struct rzb*, struct rzb_widget*),
+		void (*button_off_area)(struct rzb*, struct rzb_widget*),
+		void (*button_pressed)(struct rzb*, struct rzb_widget*),
+		void (*button_released)(struct rzb*, struct rzb_widget*),
+		void (*button_dragged)(struct rzb*, struct rzb_widget*),
+		void* button_data);
 
 void rzb_free_widget_frame(
 	struct rzb* rzb,
@@ -86,13 +75,32 @@ struct rzb_widget_frame
 	struct rzb_default_widgets_context* context;
 
 	char* title;
-	void (*callback_interactive)(void*, enum rzb_widget_frame_status);
-	void (*callback_interactive_hover)(void*, enum rzb_widget_frame_status);
-	void (*callback_frame_action)(void*, enum rzb_widget_frame_action);
-	void* callback_data;
-	void* callback_hover_data;
-	void* callback_action_data;
+	void (*button_on_area)(struct rzb*, struct rzb_widget*);
+	void (*button_off_area)(struct rzb*, struct rzb_widget*);
+	void (*button_pressed)(struct rzb*, struct rzb_widget*);
+	void (*button_released)(struct rzb*, struct rzb_widget*);
+	void (*button_dragged)(struct rzb*, struct rzb_widget*);
+	void* button_data;
 
+	struct rzb_fsm_button fsm_min_button;
+	struct rzb_fsm_button fsm_max_button;
+	struct rzb_fsm_button fsm_close_button;
+	struct rzb_fsm_button fsm_frame_button;
+
+	int frame_title_size;
+	int frame_border_size;
+	int button_min_x;
+	int button_min_y;
+	int button_min_width;
+	int button_min_height;
+	int button_max_x;
+	int button_max_y;
+	int button_max_width;
+	int button_max_height;
+	int button_close_x;
+	int button_close_y;
+	int button_close_width;
+	int button_close_height;
 	enum rzb_widget_frame_status status;
 };
 

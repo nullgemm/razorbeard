@@ -11,7 +11,1220 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <stdio.h>
+// fsms
+
+bool update_frame_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit;
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + frame->frame_border_size,
+					widget->y + frame->frame_border_size,
+					widget->width - (2 * frame->frame_border_size),
+					frame->frame_title_size - frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_MOVE;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + widget->width - frame->frame_border_size,
+					widget->y + frame->frame_border_size,
+					frame->frame_border_size,
+					widget->height - (2 * frame->frame_border_size));
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_SIZE_E;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + widget->width - frame->frame_border_size,
+					widget->y,
+					frame->frame_border_size,
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_SIZE_NE;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + frame->frame_border_size,
+					widget->y,
+					widget->width - (2 * frame->frame_border_size),
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_SIZE_N;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y,
+					frame->frame_border_size,
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_SIZE_NW;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y + frame->frame_border_size,
+					frame->frame_border_size,
+					widget->height - (2 * frame->frame_border_size));
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_SIZE_W;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y + widget->height - frame->frame_border_size,
+					frame->frame_border_size,
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_SIZE_SW;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + frame->frame_border_size,
+					widget->y + widget->height - frame->frame_border_size,
+					widget->width - (2 * frame->frame_border_size),
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_SIZE_S;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + widget->width - frame->frame_border_size,
+					widget->y + widget->height - frame->frame_border_size,
+					frame->frame_border_size,
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_SIZE_SE;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+				break;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_PRESS)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
+
+				rzb_select_widget(
+					rzb,
+					widget);
+
+				rzb_helper_transition_callback(frame->button_pressed, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit;
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + frame->frame_border_size,
+					widget->y + frame->frame_border_size,
+					widget->width - (2 * frame->frame_border_size),
+					frame->frame_title_size - frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				if (frame->status != RZB_WIDGET_FRAME_MOVE)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_MOVE;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+				}
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + widget->width - frame->frame_border_size,
+					widget->y + frame->frame_border_size,
+					frame->frame_border_size,
+					widget->height - (2 * frame->frame_border_size));
+			
+			if (hit == true)
+			{
+				//if (frame->status != RZB_WIDGET_FRAME_SIZE_E)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_E;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+				}
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + widget->width - frame->frame_border_size,
+					widget->y,
+					frame->frame_border_size,
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				//if (frame->status != RZB_WIDGET_FRAME_SIZE_NE)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_NE;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+				}
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + frame->frame_border_size,
+					widget->y,
+					widget->width - (2 * frame->frame_border_size),
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				//if (frame->status != RZB_WIDGET_FRAME_SIZE_N)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_N;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+				}
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y,
+					frame->frame_border_size,
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				//if (frame->status != RZB_WIDGET_FRAME_SIZE_NW)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_NW;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+				}
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y + frame->frame_border_size,
+					frame->frame_border_size,
+					widget->height - (2 * frame->frame_border_size));
+			
+			if (hit == true)
+			{
+				//if (frame->status != RZB_WIDGET_FRAME_SIZE_W)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_W;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+				}
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x,
+					widget->y + widget->height - frame->frame_border_size,
+					frame->frame_border_size,
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				//if (frame->status != RZB_WIDGET_FRAME_SIZE_SW)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_SW;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+				}
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + frame->frame_border_size,
+					widget->y + widget->height - frame->frame_border_size,
+					widget->width - (2 * frame->frame_border_size),
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				//if (frame->status != RZB_WIDGET_FRAME_SIZE_S)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_S;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+				}
+
+				handled = true;
+				break;
+			}
+
+			hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					widget->x + widget->width - frame->frame_border_size,
+					widget->y + widget->height - frame->frame_border_size,
+					frame->frame_border_size,
+					frame->frame_border_size);
+			
+			if (hit == true)
+			{
+				//if (frame->status != RZB_WIDGET_FRAME_SIZE_SE)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_SE;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+				}
+
+				handled = true;
+				break;
+			}
+
+			frame->status = RZB_WIDGET_FRAME_IDLE;
+
+			rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_frame_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			rzb_helper_transition_callback(frame->button_dragged, rzb, widget);
+
+			handled = true;
+
+			break;
+		}
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_RELEASE)
+			{
+				bool hit;
+				handled = true;
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						widget->x + frame->frame_border_size,
+						widget->y + frame->frame_border_size,
+						widget->width - (2 * frame->frame_border_size),
+						frame->frame_title_size - frame->frame_border_size);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_MOVE;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+					break;
+				}
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						widget->x + widget->width - frame->frame_border_size,
+						widget->y + frame->frame_border_size,
+						frame->frame_border_size,
+						widget->height - (2 * frame->frame_border_size));
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_E;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+					break;
+				}
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						widget->x + widget->width - frame->frame_border_size,
+						widget->y,
+						frame->frame_border_size,
+						frame->frame_border_size);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_NE;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+					break;
+				}
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						widget->x + frame->frame_border_size,
+						widget->y,
+						widget->width - (2 * frame->frame_border_size),
+						frame->frame_border_size);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_N;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+					break;
+				}
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						widget->x,
+						widget->y,
+						frame->frame_border_size,
+						frame->frame_border_size);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_NW;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+					break;
+				}
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						widget->x,
+						widget->y + frame->frame_border_size,
+						frame->frame_border_size,
+						widget->height - (2 * frame->frame_border_size));
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_W;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+					break;
+				}
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						widget->x,
+						widget->y + widget->height - frame->frame_border_size,
+						frame->frame_border_size,
+						frame->frame_border_size);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_SW;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+					break;
+				}
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						widget->x + frame->frame_border_size,
+						widget->y + widget->height - frame->frame_border_size,
+						widget->width - (2 * frame->frame_border_size),
+						frame->frame_border_size);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_S;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+					break;
+				}
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						widget->x + widget->width - frame->frame_border_size,
+						widget->y + widget->height - frame->frame_border_size,
+						frame->frame_border_size,
+						frame->frame_border_size);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_frame_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+					frame->status = RZB_WIDGET_FRAME_SIZE_SE;
+					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+					break;
+				}
+
+				rzb_fsm_button_set_state(
+					&(frame->fsm_frame_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				frame->status = RZB_WIDGET_FRAME_IDLE;
+
+				rzb_helper_transition_callback(frame->button_released, rzb, widget);
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_min_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					frame->button_min_x,
+					frame->button_min_y,
+					frame->button_min_width,
+					frame->button_min_height);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_min_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_MINIMIZE;
+				widget->render = true;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_min_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_PRESS)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_min_button),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
+
+				rzb_select_widget(
+					rzb,
+					widget);
+
+				rzb_helper_transition_callback(frame->button_pressed, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					frame->button_min_x,
+					frame->button_min_y,
+					frame->button_min_width,
+					frame->button_min_height);
+			
+			if (hit == false)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_min_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				frame->status = RZB_WIDGET_FRAME_IDLE;
+				widget->render = true;
+
+				rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_min_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_RELEASE)
+			{
+				bool hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						frame->button_min_x,
+						frame->button_min_y,
+						frame->button_min_width,
+						frame->button_min_height);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_min_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+				}
+				else
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_min_button),
+						RZB_FSM_BUTTON_STATE_IDLING);
+
+					frame->status = RZB_WIDGET_FRAME_IDLE;
+					widget->render = true;
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+				}
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_max_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					frame->button_max_x,
+					frame->button_max_y,
+					frame->button_max_width,
+					frame->button_max_height);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_max_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_MAXIMIZE;
+				widget->render = true;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_max_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_PRESS)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_max_button),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
+
+				rzb_select_widget(
+					rzb,
+					widget);
+
+				rzb_helper_transition_callback(frame->button_pressed, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					frame->button_max_x,
+					frame->button_max_y,
+					frame->button_max_width,
+					frame->button_max_height);
+			
+			if (hit == false)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_max_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				frame->status = RZB_WIDGET_FRAME_IDLE;
+				widget->render = true;
+
+				rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_max_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_RELEASE)
+			{
+				bool hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						frame->button_max_x,
+						frame->button_max_y,
+						frame->button_max_width,
+						frame->button_max_height);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_max_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+				}
+				else
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_max_button),
+						RZB_FSM_BUTTON_STATE_IDLING);
+
+					frame->status = RZB_WIDGET_FRAME_IDLE;
+					widget->render = true;
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+				}
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_close_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					frame->button_close_x,
+					frame->button_close_y,
+					frame->button_close_width,
+					frame->button_close_height);
+			
+			if (hit == true)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_close_button),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				frame->status = RZB_WIDGET_FRAME_CLOSE;
+				widget->render = true;
+
+				rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_close_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_PRESS)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_close_button),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
+
+				rzb_select_widget(
+					rzb,
+					widget);
+
+				rzb_helper_transition_callback(frame->button_pressed, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		case RZB_MOUSE_MOTION:
+		{
+			bool hit =
+				rzb_helper_event_mouse_in_rect(
+					context,
+					frame->button_close_x,
+					frame->button_close_y,
+					frame->button_close_width,
+					frame->button_close_height);
+			
+			if (hit == false)
+			{
+				rzb_fsm_button_set_state(
+					&(frame->fsm_close_button),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				frame->status = RZB_WIDGET_FRAME_IDLE;
+				widget->render = true;
+
+				rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+bool update_close_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_frame* frame = widget->data_widget;
+	struct rzb_default_widgets_context* context = frame->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_RELEASE)
+			{
+				bool hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						frame->button_close_x,
+						frame->button_close_y,
+						frame->button_close_width,
+						frame->button_close_height);
+				
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_close_button),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+				}
+				else
+				{
+					rzb_fsm_button_set_state(
+						&(frame->fsm_close_button),
+						RZB_FSM_BUTTON_STATE_IDLING);
+
+					frame->status = RZB_WIDGET_FRAME_IDLE;
+					widget->render = true;
+
+					rzb_helper_transition_callback(frame->button_released, rzb, widget);
+				}
+
+				handled = true;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
 
 // frame
 
@@ -21,12 +1234,12 @@ struct rzb_widget*
 		void (*callback_layout)(struct rzb*, struct rzb_widget*),
 		struct rzb_default_widgets_context* context,
 		char* title,
-		void (*callback_interactive)(void*, enum rzb_widget_frame_status),
-		void (*callback_interactive_hover)(void*, enum rzb_widget_frame_status),
-		void (*callback_frame_action)(void*, enum rzb_widget_frame_action),
-		void* callback_data,
-		void* callback_hover_data,
-		void* callback_action_data)
+		void (*button_on_area)(struct rzb*, struct rzb_widget*),
+		void (*button_off_area)(struct rzb*, struct rzb_widget*),
+		void (*button_pressed)(struct rzb*, struct rzb_widget*),
+		void (*button_released)(struct rzb*, struct rzb_widget*),
+		void (*button_dragged)(struct rzb*, struct rzb_widget*),
+		void* button_data)
 {
 	struct rzb_widget* widget = malloc(sizeof (struct rzb_widget));
 
@@ -59,12 +1272,12 @@ struct rzb_widget*
 	{
 		.context = context,
 		.title = strdup(title),
-		.callback_interactive = callback_interactive,
-		.callback_interactive_hover = callback_interactive_hover,
-		.callback_frame_action = callback_frame_action,
-		.callback_data = callback_data,
-		.callback_hover_data = callback_hover_data,
-		.callback_action_data = callback_action_data,
+		.button_on_area = button_on_area,
+		.button_off_area = button_off_area,
+		.button_pressed = button_pressed,
+		.button_released = button_released,
+		.button_dragged = button_dragged,
+		.button_data = button_data,
 		.status = RZB_WIDGET_FRAME_IDLE,
 	};
 
@@ -87,6 +1300,59 @@ struct rzb_widget*
 	// naive-copy the data and link it to the widget
 	*data = frame;
 	widget->data_widget = data;
+
+	// fsm
+	bool (*update_frame[RZB_FSM_BUTTON_STATE_COUNT])(
+		struct rzb* rzb, void*, int, int) =
+	{
+		[RZB_FSM_BUTTON_STATE_IDLING] = update_frame_idling,
+		[RZB_FSM_BUTTON_STATE_HOVERING] = update_frame_hovering,
+		[RZB_FSM_BUTTON_STATE_DRAGGING] = update_frame_dragging,
+	};
+
+	bool (*update_min[RZB_FSM_BUTTON_STATE_COUNT])(
+		struct rzb* rzb, void*, int, int) =
+	{
+		[RZB_FSM_BUTTON_STATE_IDLING] = update_min_idling,
+		[RZB_FSM_BUTTON_STATE_HOVERING] = update_min_hovering,
+		[RZB_FSM_BUTTON_STATE_DRAGGING] = update_min_dragging,
+	};
+
+	bool (*update_max[RZB_FSM_BUTTON_STATE_COUNT])(
+		struct rzb* rzb, void*, int, int) =
+	{
+		[RZB_FSM_BUTTON_STATE_IDLING] = update_max_idling,
+		[RZB_FSM_BUTTON_STATE_HOVERING] = update_max_hovering,
+		[RZB_FSM_BUTTON_STATE_DRAGGING] = update_max_dragging,
+	};
+
+	bool (*update_close[RZB_FSM_BUTTON_STATE_COUNT])(
+		struct rzb* rzb, void*, int, int) =
+	{
+		[RZB_FSM_BUTTON_STATE_IDLING] = update_close_idling,
+		[RZB_FSM_BUTTON_STATE_HOVERING] = update_close_hovering,
+		[RZB_FSM_BUTTON_STATE_DRAGGING] = update_close_dragging,
+	};
+
+	rzb_fsm_button_init(
+		&(data->fsm_frame_button),
+		widget,
+		update_frame);
+
+	rzb_fsm_button_init(
+		&(data->fsm_min_button),
+		widget,
+		update_min);
+
+	rzb_fsm_button_init(
+		&(data->fsm_max_button),
+		widget,
+		update_max);
+
+	rzb_fsm_button_init(
+		&(data->fsm_close_button),
+		widget,
+		update_close);
 
 	return widget;
 }
@@ -239,26 +1505,42 @@ void rzb_render_widget_frame(
 	int frame_button = context->sizes_current->frame_button_size;
 
 	// hover rectangle
-	int button_hover;
+	int button_hover = 0;
+	enum rzb_fsm_button_state state;
 
 	switch (data->status)
 	{
-		case RZB_WIDGET_FRAME_PRESS_MIN:
-		case RZB_WIDGET_FRAME_HOVER_MIN:
+		case RZB_WIDGET_FRAME_MINIMIZE:
 		{
-			button_hover = 3;
+			state = rzb_fsm_button_get_state(&(data->fsm_min_button));
+
+			if (state != RZB_FSM_BUTTON_STATE_IDLING)
+			{
+				button_hover = 3;
+			}
+
 			break;
 		}
-		case RZB_WIDGET_FRAME_PRESS_MAX:
-		case RZB_WIDGET_FRAME_HOVER_MAX:
+		case RZB_WIDGET_FRAME_MAXIMIZE:
 		{
-			button_hover = 2;
+			state = rzb_fsm_button_get_state(&(data->fsm_max_button));
+
+			if (state != RZB_FSM_BUTTON_STATE_IDLING)
+			{
+				button_hover = 2;
+			}
+
 			break;
 		}
-		case RZB_WIDGET_FRAME_PRESS_CLOSE:
-		case RZB_WIDGET_FRAME_HOVER_CLOSE:
+		case RZB_WIDGET_FRAME_CLOSE:
 		{
-			button_hover = 1;
+			state = rzb_fsm_button_get_state(&(data->fsm_close_button));
+
+			if (state != RZB_FSM_BUTTON_STATE_IDLING)
+			{
+				button_hover = 1;
+			}
+
 			break;
 		}
 		default:
@@ -267,6 +1549,24 @@ void rzb_render_widget_frame(
 			break;
 		}
 	}
+
+	data->frame_title_size = context->sizes_current->frame_default_height;
+	data->frame_border_size = context->sizes_current->frame_border_size;
+
+	data->button_min_x = widget->x + widget->width - frame_border - (3 * frame_button);
+	data->button_min_y = widget->y + frame_border;
+	data->button_min_width = frame_button;
+	data->button_min_height = frame_height - (2 * frame_border);
+
+	data->button_max_x = widget->x + widget->width - frame_border - (2 * frame_button);
+	data->button_max_y = widget->y + frame_border;
+	data->button_max_width = frame_button;
+	data->button_max_height = frame_height - (2 * frame_border);
+
+	data->button_close_x = widget->x + widget->width - frame_border - (1 * frame_button);
+	data->button_close_y = widget->y + frame_border;
+	data->button_close_width = frame_button;
+	data->button_close_height = frame_height - (2 * frame_border);
 
 	if (button_hover > 0)
 	{
@@ -390,313 +1690,108 @@ bool rzb_event_widget_frame(
 	int event_state)
 {
 	struct rzb_widget_frame* data = widget->data_widget;
-	struct rzb_default_widgets_context* context = data->context;
 
-	switch (event_code)
+	// if there is a fsm is not idling, only try its handler
+
+	enum rzb_fsm_button_state state;
+
+	state = rzb_fsm_button_get_state(&(data->fsm_min_button));
+
+	if (state != RZB_FSM_BUTTON_STATE_IDLING)
 	{
-		case RZB_MOUSE_CLICK_LEFT:
-		{
-			enum rzb_widget_frame_status status;
-
-			// click release
-
-			if (event_state == RZB_STATE_RELEASE)
-			{
-				data->status = RZB_WIDGET_FRAME_IDLE;
-				data->callback_interactive(data->callback_data, data->status);
-				widget->render = true;
-				return true;
-			}
-
-			// interactive move and resize
-
-			switch (data->status)
-			{
-				case RZB_WIDGET_FRAME_SIZE_E:
-				case RZB_WIDGET_FRAME_SIZE_NE:
-				case RZB_WIDGET_FRAME_SIZE_N:
-				case RZB_WIDGET_FRAME_SIZE_NW:
-				case RZB_WIDGET_FRAME_SIZE_W:
-				case RZB_WIDGET_FRAME_SIZE_SW:
-				case RZB_WIDGET_FRAME_SIZE_S:
-				case RZB_WIDGET_FRAME_SIZE_SE:
-				case RZB_WIDGET_FRAME_MOVE:
-				{
-					data->callback_interactive(data->callback_data, data->status);
-					widget->render = true;
-					return true;
-				}
-				default:
-				{
-					break;
-				}
-			}
-
-			// buttons
-
-			switch (data->status)
-			{
-				case RZB_WIDGET_FRAME_HOVER_CLOSE:
-				{
-					status = RZB_WIDGET_FRAME_PRESS_CLOSE;
-					data->callback_frame_action(data->callback_action_data, RZB_WIDGET_FRAME_CLOSE);
-					break;
-				}
-				case RZB_WIDGET_FRAME_HOVER_MAX:
-				{
-					status = RZB_WIDGET_FRAME_PRESS_MAX;
-					data->callback_frame_action(data->callback_action_data, RZB_WIDGET_FRAME_MAXIMIZE);
-					break;
-				}
-				case RZB_WIDGET_FRAME_HOVER_MIN:
-				{
-					status = RZB_WIDGET_FRAME_PRESS_MIN;
-					data->callback_frame_action(data->callback_action_data, RZB_WIDGET_FRAME_MINIMIZE);
-					break;
-				}
-				default:
-				{
-					status = RZB_WIDGET_FRAME_IDLE;
-					break;
-				}
-			}
-
-			if (data->status != status)
-			{
-				data->status = status;
-				widget->render = true;
-				return true;
-			}
-
-			return false;
-		}
-		case RZB_MOUSE_MOTION:
-		{
-			int frame_height = context->sizes_current->frame_default_height;
-			int frame_border = context->sizes_current->frame_border_size;
-			int frame_button = context->sizes_current->frame_button_size;
-			bool hit;
-
-			// corners
-			
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y,
-					2 * frame_border,
-					2 * frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_NW;
-				data->callback_interactive_hover(data->callback_hover_data, data->status);
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x + widget->width - (2 * frame_border),
-					widget->y,
-					2 * frame_border,
-					2 * frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_NE;
-				data->callback_interactive_hover(data->callback_hover_data, data->status);
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x + widget->width - (2 * frame_border),
-					widget->y + widget->height - (2 * frame_border),
-					2 * frame_border,
-					2 * frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_SE;
-				data->callback_interactive_hover(data->callback_hover_data, data->status);
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y + widget->height - (2 * frame_border),
-					2 * frame_border,
-					2 * frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_SW;
-				data->callback_interactive_hover(data->callback_hover_data, data->status);
-				return true;
-			}
-
-			// borders
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y,
-					widget->width,
-					frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_N;
-				data->callback_interactive_hover(data->callback_hover_data, data->status);
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x + widget->width - frame_border,
-					widget->y + frame_border,
-					frame_border,
-					widget->height - (2 * frame_border));
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_E;
-				data->callback_interactive_hover(data->callback_hover_data, data->status);
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y + frame_border,
-					frame_border,
-					widget->height - (2 * frame_border));
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_W;
-				data->callback_interactive_hover(data->callback_hover_data, data->status);
-				return true;
-			}
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y + widget->height - frame_border,
-					widget->width,
-					frame_border);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_SIZE_S;
-				data->callback_interactive_hover(data->callback_hover_data, data->status);
-				return true;
-			}
-
-			enum rzb_widget_frame_status status = RZB_WIDGET_FRAME_IDLE;
-			int pos_y_hover = widget->y + frame_border;
-			int height_hover = frame_height - (2 * frame_border);
-			int pos_x_hover = widget->x + widget->width - frame_border - frame_button;
-			int width_hover = frame_button;
-
-			int table[3] =
-			{
-				RZB_WIDGET_FRAME_HOVER_CLOSE,
-				RZB_WIDGET_FRAME_HOVER_MAX,
-				RZB_WIDGET_FRAME_HOVER_MIN
-			};
-
-			int i = 0;
-
-			while (i < 3)
-			{
-				hit =
-					rzb_helper_event_mouse_in_rect(
-						context,
-						pos_x_hover,
-						pos_y_hover,
-						width_hover,
-						height_hover);
-
-				if (hit == true)
-				{
-					status = table[i];
-					widget->render = true;
-					break;
-				}
-
-				pos_x_hover -= frame_button;
-				++i;
-			}
-
-			if (hit == true)
-			{
-				data->status = status;
-				data->callback_interactive_hover(data->callback_hover_data, RZB_WIDGET_FRAME_MOVE);
-				widget->render = true;
-				return true;
-			}
-
-			// move
-
-			hit =
-				rzb_helper_event_mouse_in_rect(
-					context,
-					widget->x,
-					widget->y,
-					widget->width,
-					frame_height);
-
-			if (hit == true)
-			{
-				data->status = RZB_WIDGET_FRAME_MOVE;
-				data->callback_interactive_hover(data->callback_hover_data, data->status);
-				return true;
-			}
-
-			data->status = RZB_WIDGET_FRAME_IDLE;
-			data->callback_interactive_hover(data->callback_hover_data, data->status);
-			return false;
-		}
-		default:
-		{
-			return false;
-		}
+		return rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_min_button),
+			event_code,
+			event_state);
 	}
-}
 
-void rzb_event_widget_frame_size_move(
-	struct rzb* rzb,
-	struct rzb_widget* widget)
-{
-	// TODO
-}
+	state = rzb_fsm_button_get_state(&(data->fsm_max_button));
 
-void rzb_event_widget_frame_close(
-	struct rzb* rzb,
-	struct rzb_widget* widget)
-{
-	// TODO
-}
+	if (state != RZB_FSM_BUTTON_STATE_IDLING)
+	{
+		return rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_max_button),
+			event_code,
+			event_state);
+	}
 
-void rzb_event_widget_frame_maximize(
-	struct rzb* rzb,
-	struct rzb_widget* widget)
-{
-	// TODO
-}
+	state = rzb_fsm_button_get_state(&(data->fsm_close_button));
 
-void rzb_event_widget_frame_minimize(
-	struct rzb* rzb,
-	struct rzb_widget* widget)
-{
-	// TODO
+	if (state != RZB_FSM_BUTTON_STATE_IDLING)
+	{
+		return rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_close_button),
+			event_code,
+			event_state);
+	}
+
+	state = rzb_fsm_button_get_state(&(data->fsm_frame_button));
+
+	if (state == RZB_FSM_BUTTON_STATE_DRAGGING)
+	{
+		return rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_frame_button),
+			event_code,
+			event_state);
+	}
+
+	// otherwise try all fsm handlers
+
+	bool handled;
+
+	handled =
+		rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_min_button),
+			event_code,
+			event_state);
+
+	if (handled == true)
+	{
+		return handled;
+	}
+
+	handled =
+		rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_max_button),
+			event_code,
+			event_state);
+
+	if (handled == true)
+	{
+		return handled;
+	}
+
+	handled =
+		rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_close_button),
+			event_code,
+			event_state);
+
+	if (handled == true)
+	{
+		return handled;
+	}
+
+	handled =
+		rzb_fsm_button_update(
+			rzb,
+			&(data->fsm_frame_button),
+			event_code,
+			event_state);
+
+	if (handled == true)
+	{
+		return handled;
+	}
+
+	// return false if no fsm handler accepted the event
+
+	return handled;
 }
