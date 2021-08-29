@@ -36,14 +36,6 @@ bool rzb_event_widget_button(
 	int event_code,
 	int event_state);
 
-void rzb_event_widget_button_click(
-	struct rzb* rzb,
-	struct rzb_widget* widget);
-
-void rzb_event_widget_button_release(
-	struct rzb* rzb,
-	struct rzb_widget* widget);
-
 struct rzb_widget_button
 {
 	struct rzb_default_widgets_context* context;

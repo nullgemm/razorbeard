@@ -514,17 +514,3 @@ bool rzb_event_widget_button(
 
 	return rzb_fsm_button_update(rzb, &(data->fsm_button), event_code, event_state);
 }
-
-void rzb_event_widget_button_click(
-	struct rzb* rzb,
-	struct rzb_widget* widget)
-{
-	// TODO
-}
-
-void rzb_event_widget_button_release(
-	struct rzb* rzb,
-	struct rzb_widget* widget)
-{
-	// TODO
-}

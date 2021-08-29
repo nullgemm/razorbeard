@@ -12,7 +12,11 @@ struct rzb_widget*
 		struct rzb* rzb,
 		void (*callback_layout)(struct rzb*, struct rzb_widget*),
 		struct rzb_default_widgets_context* context,
-		void (*radiobutton_changed)(struct rzb*, struct rzb_widget*),
+		void (*button_on_area)(struct rzb*, struct rzb_widget*),
+		void (*button_off_area)(struct rzb*, struct rzb_widget*),
+		void (*button_pressed)(struct rzb*, struct rzb_widget*),
+		void (*button_released_on_area)(struct rzb*, struct rzb_widget*),
+		void (*button_released_off_area)(struct rzb*, struct rzb_widget*),
 		bool checked);
 
 void rzb_free_widget_radiobutton(
@@ -30,19 +34,17 @@ bool rzb_event_widget_radiobutton(
 	int event_code,
 	int event_state);
 
-void rzb_event_widget_radiobutton_click(
-	struct rzb* rzb,
-	struct rzb_widget* widget);
-
-void rzb_event_widget_radiobutton_release(
-	struct rzb* rzb,
-	struct rzb_widget* widget);
-
 struct rzb_widget_radiobutton
 {
 	struct rzb_default_widgets_context* context;
 
-	void (*radiobutton_changed)(struct rzb*, struct rzb_widget*);
+	void (*button_on_area)(struct rzb*, struct rzb_widget*);
+	void (*button_off_area)(struct rzb*, struct rzb_widget*);
+	void (*button_pressed)(struct rzb*, struct rzb_widget*);
+	void (*button_released_on_area)(struct rzb*, struct rzb_widget*);
+	void (*button_released_off_area)(struct rzb*, struct rzb_widget*);
+
+	struct rzb_fsm_button fsm_radiobutton;
 
 	bool checked;
 };
