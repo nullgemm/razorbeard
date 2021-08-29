@@ -11,7 +11,344 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <stdio.h>
+// fsm update callbacks
+
+static bool update_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_handles* handles = widget->data_widget;
+	struct rzb_default_widgets_context* context = handles->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_MOTION:
+		{
+			int x;
+			int y; 
+			int width;
+			int height;
+
+			if (handles->horizontal == true)
+			{
+				x = widget->x - context->sizes_current->radius_handle;
+				y = widget->y;
+				width = 2 * context->sizes_current->radius_handle;
+				height = widget->height;
+			}
+			else
+			{
+				x = widget->x;
+				y = widget->y - context->sizes_current->radius_handle;
+				width = widget->width;
+				height = 2 * context->sizes_current->radius_handle;
+			}
+
+			bool hit;
+			int i = 0;
+
+			while (i < handles->sections_count - 1)
+			{
+				if (handles->horizontal == true)
+				{
+					x += handles->section_lengths[i];
+				}
+				else
+				{
+					y += handles->section_lengths[i];
+				}
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						x,
+						y,
+						width,
+						height);
+
+				if (hit == true)
+				{
+					rzb_fsm_button_set_state(
+						&(handles->fsm_handles),
+						RZB_FSM_BUTTON_STATE_HOVERING);
+
+					handles->section_dragging = &(handles->section_lengths[i]);
+					rzb_helper_transition_callback(handles->button_on_area, rzb, widget);
+
+					handled = true;
+					break;
+				}
+
+				++i;
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+static bool update_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_handles* handles = widget->data_widget;
+	struct rzb_default_widgets_context* context = handles->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_PRESS)
+			{
+				rzb_fsm_button_set_state(
+					&(handles->fsm_handles),
+					RZB_FSM_BUTTON_STATE_DRAGGING);
+
+				rzb_select_widget(
+					rzb,
+					widget);
+
+				if (handles->horizontal == true)
+				{
+					handles->selection_pos = 
+						context->events_data.mouse_pos_x;
+				}
+				else
+				{
+					handles->selection_pos = 
+						context->events_data.mouse_pos_y;
+				}
+
+				handles->selection_original_size =
+					handles->section_dragging[0];
+				handles->selection_original_size_next =
+					handles->section_dragging[1];
+
+				rzb_helper_transition_callback(handles->button_pressed, rzb, widget);
+
+				handled = true;
+			}
+
+			break;
+		}
+		case RZB_MOUSE_MOTION:
+		{
+			int x;
+			int y; 
+			int width;
+			int height;
+
+			if (handles->horizontal == true)
+			{
+				x = widget->x - context->sizes_current->radius_handle;
+				y = widget->y;
+				width = 2 * context->sizes_current->radius_handle;
+				height = widget->height;
+			}
+			else
+			{
+				x = widget->x;
+				y = widget->y - context->sizes_current->radius_handle;
+				width = widget->width;
+				height = 2 * context->sizes_current->radius_handle;
+			}
+
+			bool hit;
+			int i = 0;
+
+			while (i < handles->sections_count - 1)
+			{
+				if (handles->horizontal == true)
+				{
+					x += handles->section_lengths[i];
+				}
+				else
+				{
+					y += handles->section_lengths[i];
+				}
+
+				hit =
+					rzb_helper_event_mouse_in_rect(
+						context,
+						x,
+						y,
+						width,
+						height);
+				
+				if (hit == true)
+				{
+					handles->section_dragging = &(handles->section_lengths[i]);
+					handled = true;
+					break;
+				}
+
+				++i;
+			}
+
+			if (handled == false)
+			{
+				rzb_fsm_button_set_state(
+					&(handles->fsm_handles),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				handles->section_dragging = NULL;
+				handled = true;
+
+				rzb_helper_transition_callback(handles->button_off_area, rzb, widget);
+			}
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
+
+static bool update_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+{
+	bool handled = false;
+	struct rzb_widget* widget = data;
+	struct rzb_widget_handles* handles = widget->data_widget;
+	struct rzb_default_widgets_context* context = handles->context;
+
+	switch (event_code)
+	{
+		case RZB_MOUSE_CLICK_LEFT:
+		{
+			if (event_state == RZB_STATE_RELEASE)
+			{
+				int x;
+				int y; 
+				int width;
+				int height;
+
+				if (handles->horizontal == true)
+				{
+					x = widget->x - context->sizes_current->radius_handle;
+					y = widget->y;
+					width = 2 * context->sizes_current->radius_handle;
+					height = widget->height;
+				}
+				else
+				{
+					x = widget->x;
+					y = widget->y - context->sizes_current->radius_handle;
+					width = widget->width;
+					height = 2 * context->sizes_current->radius_handle;
+				}
+
+				bool hit;
+				int i = 0;
+
+				while (i < handles->sections_count - 1)
+				{
+					if (handles->horizontal == true)
+					{
+						x += handles->section_lengths[i];
+					}
+					else
+					{
+						y += handles->section_lengths[i];
+					}
+
+					hit =
+						rzb_helper_event_mouse_in_rect(
+							context,
+							x,
+							y,
+							width,
+							height);
+					
+					if (hit == true)
+					{
+						rzb_fsm_button_set_state(
+							&(handles->fsm_handles),
+							RZB_FSM_BUTTON_STATE_HOVERING);
+
+						handles->section_dragging = &(handles->section_lengths[i]);
+						handled = true;
+
+						rzb_helper_transition_callback(handles->button_released, rzb, widget);
+
+						break;
+					}
+
+					++i;
+				}
+
+				if (handled == false)
+				{
+					rzb_fsm_button_set_state(
+						&(handles->fsm_handles),
+						RZB_FSM_BUTTON_STATE_IDLING);
+
+					handles->section_dragging = NULL;
+					handled = true;
+
+					rzb_helper_transition_callback(handles->button_released, rzb, widget);
+				}
+
+				break;
+			}
+
+			break;
+		}
+		case RZB_MOUSE_MOTION:
+		{ 
+			int mouse;
+
+			if (handles->horizontal == true)
+			{
+				mouse = context->events_data.mouse_pos_x;
+			}
+			else
+			{
+				mouse = context->events_data.mouse_pos_y;
+			}
+
+			handles->section_dragging[0] =
+				handles->selection_original_size
+				+ (mouse - handles->selection_pos);
+
+			if (handles->section_dragging[0] < 2 * context->sizes_current->radius_handle)
+			{
+				handles->section_dragging[0] = 2 * context->sizes_current->radius_handle;
+			}
+
+			if (handles->section_dragging[0] > (handles->selection_original_size + handles->selection_original_size_next - (2 * context->sizes_current->radius_handle)))
+			{
+				handles->section_dragging[0] = handles->selection_original_size + handles->selection_original_size_next - (2 * context->sizes_current->radius_handle);
+			}
+
+			handles->section_dragging[1] =
+				handles->selection_original_size
+				+ handles->selection_original_size_next
+				- handles->section_dragging[0];
+
+			rzb_helper_transition_callback(handles->button_dragged, rzb, widget);
+
+			widget->render = true;
+
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return handled;
+}
 
 // handles
 
@@ -20,6 +357,12 @@ struct rzb_widget*
 		struct rzb* rzb,
 		void (*callback_layout)(struct rzb*, struct rzb_widget*),
 		struct rzb_default_widgets_context* context,
+		void (*button_on_area)(struct rzb*, struct rzb_widget*),
+		void (*button_off_area)(struct rzb*, struct rzb_widget*),
+		void (*button_pressed)(struct rzb*, struct rzb_widget*),
+		void (*button_released)(struct rzb*, struct rzb_widget*),
+		void (*button_dragged)(struct rzb*, struct rzb_widget*),
+		void* handles_data,
 		bool horizontal,
 		int sections_count)
 {
@@ -58,10 +401,21 @@ struct rzb_widget*
 	struct rzb_widget_handles handles =
 	{
 		.context = context,
+
+		.button_on_area = button_on_area,
+		.button_off_area = button_off_area,
+		.button_pressed = button_pressed,
+		.button_released = button_released,
+		.button_dragged = button_dragged,
+		.handles_data = handles_data,
+
 		.horizontal = horizontal,
 		.sections_count = sections_count,
 		.section_lengths = malloc(sections_count * sizeof (int)),
 		.section_dragging = NULL,
+		.selection_pos = 0,
+		.selection_original_size = 0,
+		.selection_original_size_next = 0,
 	};
 
 	if (handles.section_lengths == NULL)
@@ -84,6 +438,19 @@ struct rzb_widget*
 	// naive-copy the data and link it to the widget
 	*data = handles;
 	widget->data_widget = data;
+
+	// prepare the fsm
+	bool (*update[RZB_FSM_BUTTON_STATE_COUNT])(struct rzb* rzb, void*, int, int) =
+	{
+		[RZB_FSM_BUTTON_STATE_IDLING] = update_idling,
+		[RZB_FSM_BUTTON_STATE_HOVERING] = update_hovering,
+		[RZB_FSM_BUTTON_STATE_DRAGGING] = update_dragging,
+	};
+
+	rzb_fsm_button_init(
+		&(data->fsm_handles),
+		widget,
+		update);
 
 	return widget;
 }
@@ -329,30 +696,7 @@ bool rzb_event_widget_handles(
 	int event_code,
 	int event_state)
 {
-#if 0
 	struct rzb_widget_handles* data = widget->data_widget;
-	struct rzb_default_widgets_context* context = data->context;
-#endif
 
-	switch (event_code)
-	{
-		default:
-		{
-			return false;
-		}
-	}
-}
-
-void rzb_event_widget_handles_move_start(
-	struct rzb* rzb,
-	struct rzb_widget* widget)
-{
-	// TODO
-}
-
-void rzb_event_widget_handles_move_end(
-	struct rzb* rzb,
-	struct rzb_widget* widget)
-{
-	// TODO
+	return rzb_fsm_button_update(rzb, &(data->fsm_handles), event_code, event_state);
 }

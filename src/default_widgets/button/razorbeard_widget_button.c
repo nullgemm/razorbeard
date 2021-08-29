@@ -13,7 +13,7 @@
 
 // fsm update callbacks
 
-bool update_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_idling(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;
@@ -86,7 +86,7 @@ bool update_idling(struct rzb* rzb, void* data, int event_code, int event_state)
 	return handled;
 }
 
-bool update_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;
@@ -178,7 +178,7 @@ bool update_hovering(struct rzb* rzb, void* data, int event_code, int event_stat
 	return handled;
 }
 
-bool update_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;

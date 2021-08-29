@@ -54,22 +54,6 @@ bool rzb_event_widget_frame(
 	int event_code,
 	int event_state);
 
-void rzb_event_widget_frame_size_move(
-	struct rzb* rzb,
-	struct rzb_widget* widget);
-
-void rzb_event_widget_frame_close(
-	struct rzb* rzb,
-	struct rzb_widget* widget);
-
-void rzb_event_widget_frame_maximize(
-	struct rzb* rzb,
-	struct rzb_widget* widget);
-
-void rzb_event_widget_frame_minimize(
-	struct rzb* rzb,
-	struct rzb_widget* widget);
-
 struct rzb_widget_frame
 {
 	struct rzb_default_widgets_context* context;

@@ -15,7 +15,7 @@
 
 // fsm updates
 
-bool update_tab_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_tab_idling(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;
@@ -64,7 +64,7 @@ bool update_tab_idling(struct rzb* rzb, void* data, int event_code, int event_st
 	return handled;
 }
 
-bool update_tab_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_tab_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;
@@ -144,7 +144,7 @@ bool update_tab_hovering(struct rzb* rzb, void* data, int event_code, int event_
 	return handled;
 }
 
-bool update_tab_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_tab_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;
@@ -219,7 +219,7 @@ bool update_tab_dragging(struct rzb* rzb, void* data, int event_code, int event_
 	return handled;
 }
 
-bool update_prev_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_prev_idling(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;
@@ -270,7 +270,7 @@ bool update_prev_idling(struct rzb* rzb, void* data, int event_code, int event_s
 	return handled;
 }
 
-bool update_prev_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_prev_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;
@@ -333,7 +333,7 @@ bool update_prev_hovering(struct rzb* rzb, void* data, int event_code, int event
 	return handled;
 }
 
-bool update_prev_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_prev_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;
@@ -402,7 +402,7 @@ bool update_prev_dragging(struct rzb* rzb, void* data, int event_code, int event
 	return handled;
 }
 
-bool update_next_idling(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_next_idling(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;
@@ -453,7 +453,7 @@ bool update_next_idling(struct rzb* rzb, void* data, int event_code, int event_s
 	return handled;
 }
 
-bool update_next_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_next_hovering(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;
@@ -516,7 +516,7 @@ bool update_next_hovering(struct rzb* rzb, void* data, int event_code, int event
 	return handled;
 }
 
-bool update_next_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
+static bool update_next_dragging(struct rzb* rzb, void* data, int event_code, int event_state)
 {
 	bool handled = false;
 	struct rzb_widget* widget = data;

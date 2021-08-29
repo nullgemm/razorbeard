@@ -302,8 +302,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 			
 			if (hit == true)
 			{
-				//if (frame->status != RZB_WIDGET_FRAME_SIZE_E)
-				{
 					rzb_fsm_button_set_state(
 						&(frame->fsm_frame_button),
 						RZB_FSM_BUTTON_STATE_HOVERING);
@@ -311,7 +309,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
 					frame->status = RZB_WIDGET_FRAME_SIZE_E;
 					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
-				}
 
 				handled = true;
 				break;
@@ -327,8 +324,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 			
 			if (hit == true)
 			{
-				//if (frame->status != RZB_WIDGET_FRAME_SIZE_NE)
-				{
 					rzb_fsm_button_set_state(
 						&(frame->fsm_frame_button),
 						RZB_FSM_BUTTON_STATE_HOVERING);
@@ -336,7 +331,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
 					frame->status = RZB_WIDGET_FRAME_SIZE_NE;
 					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
-				}
 
 				handled = true;
 				break;
@@ -352,8 +346,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 			
 			if (hit == true)
 			{
-				//if (frame->status != RZB_WIDGET_FRAME_SIZE_N)
-				{
 					rzb_fsm_button_set_state(
 						&(frame->fsm_frame_button),
 						RZB_FSM_BUTTON_STATE_HOVERING);
@@ -361,7 +353,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
 					frame->status = RZB_WIDGET_FRAME_SIZE_N;
 					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
-				}
 
 				handled = true;
 				break;
@@ -377,8 +368,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 			
 			if (hit == true)
 			{
-				//if (frame->status != RZB_WIDGET_FRAME_SIZE_NW)
-				{
 					rzb_fsm_button_set_state(
 						&(frame->fsm_frame_button),
 						RZB_FSM_BUTTON_STATE_HOVERING);
@@ -386,7 +375,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
 					frame->status = RZB_WIDGET_FRAME_SIZE_NW;
 					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
-				}
 
 				handled = true;
 				break;
@@ -402,8 +390,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 			
 			if (hit == true)
 			{
-				//if (frame->status != RZB_WIDGET_FRAME_SIZE_W)
-				{
 					rzb_fsm_button_set_state(
 						&(frame->fsm_frame_button),
 						RZB_FSM_BUTTON_STATE_HOVERING);
@@ -411,7 +397,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
 					frame->status = RZB_WIDGET_FRAME_SIZE_W;
 					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
-				}
 
 				handled = true;
 				break;
@@ -427,8 +412,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 			
 			if (hit == true)
 			{
-				//if (frame->status != RZB_WIDGET_FRAME_SIZE_SW)
-				{
 					rzb_fsm_button_set_state(
 						&(frame->fsm_frame_button),
 						RZB_FSM_BUTTON_STATE_HOVERING);
@@ -436,7 +419,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
 					frame->status = RZB_WIDGET_FRAME_SIZE_SW;
 					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
-				}
 
 				handled = true;
 				break;
@@ -452,8 +434,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 			
 			if (hit == true)
 			{
-				//if (frame->status != RZB_WIDGET_FRAME_SIZE_S)
-				{
 					rzb_fsm_button_set_state(
 						&(frame->fsm_frame_button),
 						RZB_FSM_BUTTON_STATE_HOVERING);
@@ -461,7 +441,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
 					frame->status = RZB_WIDGET_FRAME_SIZE_S;
 					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
-				}
 
 				handled = true;
 				break;
@@ -477,8 +456,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 			
 			if (hit == true)
 			{
-				//if (frame->status != RZB_WIDGET_FRAME_SIZE_SE)
-				{
 					rzb_fsm_button_set_state(
 						&(frame->fsm_frame_button),
 						RZB_FSM_BUTTON_STATE_HOVERING);
@@ -486,7 +463,6 @@ bool update_frame_hovering(struct rzb* rzb, void* data, int event_code, int even
 					rzb_helper_transition_callback(frame->button_off_area, rzb, widget);
 					frame->status = RZB_WIDGET_FRAME_SIZE_SE;
 					rzb_helper_transition_callback(frame->button_on_area, rzb, widget);
-				}
 
 				handled = true;
 				break;
