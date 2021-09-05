@@ -34,7 +34,7 @@
 //
 // DONE smart removal of event grabber
 //      (when doing other ops such as detaching a widget...)
-// TODO fix smart arrow keys selection out-of-bounds error
+// DONE fix smart arrow keys selection out-of-bounds error
 //      (make it impossible to select out-of-bounds, cancel any out-of-bounds selection when resizing)
 // TODO add smart arrow keys selection callback
 //      (send specific event programmatically OR use key up events on selected widget)
@@ -206,6 +206,7 @@ void rzb_select_widget(
 	struct rzb_widget* widget);
 
 void rzb_widget_set_hide(
+	struct rzb* rzb,
 	struct rzb_widget* widget,
 	bool hide);
 

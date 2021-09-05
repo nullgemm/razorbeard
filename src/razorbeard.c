@@ -429,13 +429,11 @@ void rzb_select_widget(
 	{
 		rzb->events_grabber = widget;
 		widget->render = true;
-		return;
 	}
-
-	rzb->events_grabber = NULL;
 }
 
 void rzb_widget_set_hide(
+	struct rzb* rzb,
 	struct rzb_widget* widget,
 	bool hide)
 {
@@ -445,6 +443,11 @@ void rzb_widget_set_hide(
 	}
 
 	widget->hide = hide;
+
+	if ((hide == true) && (rzb->events_grabber == widget))
+	{
+		rzb->events_grabber = NULL;
+	}
 }
 
 void rzb_widget_layout_update(
