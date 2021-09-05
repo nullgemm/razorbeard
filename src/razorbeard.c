@@ -359,6 +359,12 @@ bool rzb_make_detached(
 {
 	struct rzb_widget* parent = widget->parent;
 
+	// reset event grabber if needed
+	if (widget == rzb->events_grabber)
+	{
+		rzb->events_grabber = NULL;
+	}
+
 	// if this is a root-level widget, detach carefully
 	if (parent == NULL)
 	{

@@ -32,7 +32,7 @@
 // DONE widget event handling (specific stuff: tab switch, button click, scroll...)
 // DONE razorbeard complete example with globox + willis + dpishit + cursoryx
 //
-// TODO smart removal of event grabber
+// DONE smart removal of event grabber
 //      (when doing other ops such as detaching a widget...)
 // TODO fix smart arrow keys selection out-of-bounds error
 //      (make it impossible to select out-of-bounds, cancel any out-of-bounds selection when resizing)
