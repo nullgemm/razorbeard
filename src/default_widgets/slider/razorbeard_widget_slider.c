@@ -151,6 +151,17 @@ static bool update_idling(struct rzb* rzb, void* data, int event_code, int event
 
 				handled = true;
 			}
+			else if ((event_state == RZB_STATE_RELEASE)
+			&& (rzb->events_grabber == widget))
+			{
+				rzb_fsm_button_set_state(
+					&(slider->fsm_slider),
+					RZB_FSM_BUTTON_STATE_HOVERING);
+
+				rzb_helper_transition_callback(slider->button_on_area, rzb, widget);
+
+				handled = true;
+			}
 
 			break;
 		}
@@ -333,6 +344,12 @@ static bool update_hovering(struct rzb* rzb, void* data, int event_code, int eve
 			if ((event_state == RZB_STATE_PRESS)
 			&& (rzb->events_grabber == widget))
 			{
+				rzb_fsm_button_set_state(
+					&(slider->fsm_slider),
+					RZB_FSM_BUTTON_STATE_IDLING);
+
+				rzb_helper_transition_callback(slider->button_off_area, rzb, widget);
+
 				rzb_nearest_widget(
 					rzb,
 					widget,

@@ -36,7 +36,7 @@
 //      (when doing other ops such as detaching a widget...)
 // DONE fix smart arrow keys selection out-of-bounds error
 //      (make it impossible to select out-of-bounds, cancel any out-of-bounds selection when resizing)
-// TODO add smart arrow keys selection callback
+// DONE add smart arrow keys selection callback
 //      (send specific event programmatically OR use key up events on selected widget)
 //
 // NOPE image widget
@@ -46,6 +46,7 @@
 // TODO widget data getters and setters
 // TODO new lib for complex input methods under linux, windows, macOS
 //
+// TODO fix mouse move event (or support mouse position update on click) on macOS
 // TODO popup and dropmenu widgets rendering (invalidate the whole window)
 // TODO scrollbar widget and view
 // TODO unit tests
