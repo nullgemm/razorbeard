@@ -304,8 +304,24 @@ bool rzb_update_display_info(
 	struct rzb* rzb,
 	struct rzb_display_info* display_info)
 {
-	// TODO
-	return true;
+	if ((rzb->display_info->px_width != display_info->px_width)
+		|| (rzb->display_info->px_height != display_info->px_height)
+		|| (rzb->display_info->mm_width != display_info->mm_width)
+		|| (rzb->display_info->mm_height != display_info->mm_height)
+		|| (rzb->display_info->dpi_logic != display_info->dpi_logic)
+		|| (rzb->display_info->scale != display_info->scale))
+	{
+		rzb->display_info->px_width = display_info->px_width;
+		rzb->display_info->px_height = display_info->px_height;
+		rzb->display_info->mm_width = display_info->mm_width;
+		rzb->display_info->mm_height = display_info->mm_height;
+		rzb->display_info->dpi_logic = display_info->dpi_logic;
+		rzb->display_info->scale = display_info->scale;
+		rzb->root_widget->render = true;
+		return true;
+	}
+
+	return false;
 }
 
 bool rzb_make_child(

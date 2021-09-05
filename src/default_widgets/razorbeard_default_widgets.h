@@ -124,6 +124,7 @@ struct rzb_default_widgets_context
 
 	// sizes
 
+	int sizes_scale;
 	struct rzb_default_widgets_sizes* sizes_current;
 	struct rzb_default_widgets_sizes sizes_density_low;
 	struct rzb_default_widgets_sizes sizes_density_medium;
@@ -157,6 +158,10 @@ struct rzb_default_widgets_context
 };
 
 bool rzb_default_widgets_init(
+	struct rzb* rzb,
+	struct rzb_default_widgets_context* context);
+
+void rzb_default_widgets_density(
 	struct rzb* rzb,
 	struct rzb_default_widgets_context* context);
 

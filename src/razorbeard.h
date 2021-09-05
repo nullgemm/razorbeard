@@ -29,13 +29,19 @@
 // 		- smart arrow keys is a function called in widgets event callbacks
 // 		- inputs are redirected to selected widget if any
 // 		- otherwise or if the input was rejected we traverse the whole tree
-// TODO widget event handling (specific stuff: tab switch, button click, scroll...)
-// TODO razorbeard complete example with globox + willis + dpishit + cursoryx
+// DONE widget event handling (specific stuff: tab switch, button click, scroll...)
+// DONE razorbeard complete example with globox + willis + dpishit + cursoryx
 //
-// TODO smart removal of event grabber (when doing other ops such as detaching a widget...)
+// TODO smart removal of event grabber
+//      (when doing other ops such as detaching a widget...)
 // TODO fix smart arrow keys selection out-of-bounds error
+//      (make it impossible to select out-of-bounds, cancel any out-of-bounds selection when resizing)
 // TODO add smart arrow keys selection callback
-// TODO image widget
+//      (send specific event programmatically OR use key up events on selected widget)
+//
+// NOPE image widget
+//      (add this to the list of extra widgets to implement later)
+//      (actually complete the list - with diagrams, tables, etc.)
 // TODO text rendering (bundle Noto and raqm in example rendering)
 // TODO widget data getters and setters
 // TODO new lib for complex input methods under linux, windows, macOS

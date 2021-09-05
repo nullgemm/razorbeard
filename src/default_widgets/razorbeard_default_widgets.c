@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <stdio.h>
+#define RZB_IDEAL_BUTTON_HEIGHT 9
 
 void rzb_default_widgets_set_events_data(void* context, void* data)
 {
@@ -156,6 +156,7 @@ bool rzb_default_widgets_init(
 		.padding_radiobutton = 7,
 	};
 
+	context->sizes_scale = 1;
 	context->sizes_current = &(context->sizes_density_medium);
 	context->sizes_density_low = sizes_density_low;
 	context->sizes_density_medium = sizes_density_medium;
@@ -178,6 +179,121 @@ bool rzb_default_widgets_init(
 	context->color_foreground_shine_gradient = 0xff1d1d1d;
 
 	return true;
+}
+
+void rzb_default_widgets_density(
+	struct rzb* rzb,
+	struct rzb_default_widgets_context* context)
+{
+	int px_height;
+	int mm_height;
+
+	int diff_low;
+	int diff_medium;
+	int diff_high;
+	int diff_ultra_floor;
+	int diff_ultra_ceil;
+
+	int ultra_scale_floor;
+	int ultra_scale_ceil;
+
+	int diff_min;
+
+	// use low density
+	px_height = context->sizes_density_low.tab_default_height;
+
+	mm_height =
+		px_height
+		* rzb->display_info->mm_height
+		/ rzb->display_info->px_height;
+
+	diff_low = abs(mm_height - RZB_IDEAL_BUTTON_HEIGHT);
+
+	// use medium density
+	px_height = context->sizes_density_medium.tab_default_height;
+
+	mm_height =
+		px_height
+		* rzb->display_info->mm_height
+		/ rzb->display_info->px_height;
+
+	diff_medium = abs(mm_height - RZB_IDEAL_BUTTON_HEIGHT);
+
+	// use high density
+	px_height = context->sizes_density_high.tab_default_height;
+
+	mm_height =
+		px_height
+		* rzb->display_info->mm_height
+		/ rzb->display_info->px_height;
+
+	diff_high = abs(mm_height - RZB_IDEAL_BUTTON_HEIGHT);
+
+	// automatically scale medium sizes for ultra-high densities
+	// floor
+	px_height =
+		context->sizes_density_medium.tab_default_height;
+
+	ultra_scale_floor =
+		RZB_IDEAL_BUTTON_HEIGHT
+		* rzb->display_info->px_height
+		/ rzb->display_info->mm_height;
+
+	mm_height =
+		ultra_scale_floor
+		* px_height
+		* rzb->display_info->mm_height
+		/ rzb->display_info->px_height;
+
+	diff_ultra_floor = abs(mm_height - RZB_IDEAL_BUTTON_HEIGHT);
+
+	// ceil
+	px_height =
+		context->sizes_density_medium.tab_default_height;
+
+	ultra_scale_ceil =
+		RZB_IDEAL_BUTTON_HEIGHT
+		* rzb->display_info->px_height
+		/ rzb->display_info->mm_height;
+
+	mm_height =
+		ultra_scale_ceil
+		* px_height
+		* rzb->display_info->mm_height
+		/ rzb->display_info->px_height;
+
+	diff_ultra_ceil = abs(mm_height - RZB_IDEAL_BUTTON_HEIGHT);
+
+	// find the best size set but keep the medium set on equality
+	context->sizes_current = &(context->sizes_density_medium);
+	context->sizes_scale = rzb->display_info->scale;
+	diff_min = diff_medium;
+
+	if (diff_min > diff_low)
+	{
+		context->sizes_current = &(context->sizes_density_low);
+		diff_min = diff_low;
+	}
+
+	if (diff_min > diff_high)
+	{
+		context->sizes_current = &(context->sizes_density_high);
+		diff_min = diff_high;
+	}
+
+	if (diff_min > diff_ultra_floor)
+	{
+		context->sizes_current = &(context->sizes_density_medium);
+		context->sizes_scale *= ultra_scale_floor;
+		diff_min = diff_ultra_floor;
+	}
+
+	if (diff_min > diff_ultra_ceil)
+	{
+		context->sizes_current = &(context->sizes_density_medium);
+		context->sizes_scale *= ultra_scale_ceil;
+		diff_min = diff_ultra_ceil;
+	}
 }
 
 bool rzb_default_widgets_free(
