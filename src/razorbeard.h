@@ -46,7 +46,7 @@
 // TODO widget data getters and setters
 // TODO new lib for complex input methods under linux, windows, macOS
 //
-// TODO fix mouse move event (or support mouse position update on click) on macOS
+// TODO ask for frame on macOS, no frame on windows and no frame on wayland
 // TODO popup and dropmenu widgets rendering (invalidate the whole window)
 // TODO scrollbar widget and view
 // TODO unit tests
